@@ -32,6 +32,7 @@ export default function RootLayout() {
         {/* Agora sem inicialRouteName forçado */}
         <Stack.Screen name="Login/index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="Case/NovoCasoScreen" options={{ title: 'Adicionar um Novo Caso' }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
