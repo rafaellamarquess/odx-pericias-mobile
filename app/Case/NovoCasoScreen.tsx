@@ -9,13 +9,17 @@ const NovoCasoScreen = () => {
     const router = useRouter();
 
     return(
-        // Título Principal
+        
         <View style={styles.container}>
-            <Text style={styles.title}> Adicionar um Novo caso </Text>  {/* Título Principal */}
+            {/* Header */}
+            <View style={styles.hearder}>
+                <Text style={styles.headerTitle}>Adicionar um Novo caso</Text> {/* Título Principal */}
+            </View>
+         
             {/* Indicadores de Etapa */}
             <View style={styles.stepIndicator}>
                 <View style={[styles.step, styles.activeStep]}>
-                    <Text style={styles.stepText}>1</Text>
+                    <Text style={[styles.stepText, styles.activeStepText]}>1</Text>
                 </View>
                 <View style={styles.step}>
                     <Text style={styles.stepText}>2</Text>
@@ -62,7 +66,21 @@ const styles = StyleSheet.create({
     container:{
         flex: 1,
         backgroundColor: '#F5F5F5',
-        padding: 20,
+        
+    },
+    hearder:{
+        backgroundColor: '#5FA8A0',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingVertical: 25,
+        marginBottom: 20,
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#FFF',
     },
     title: {
         fontSize: 24,
@@ -73,36 +91,44 @@ const styles = StyleSheet.create({
     stepIndicator:{
         flexDirection: 'row',
         justifyContent: 'center',
-        marginBottom: 20,
+        marginVertical: 20,
     },
     step:{
-        width: 30,
-        height: 30,
+        width: 40,
+        height: 40,
         borderRadius: 20,
-        backgroundColor: '#D3D3D3',
-        marginHorizontal: 5,
+        backgroundColor: '#FFF',
+        marginHorizontal: 8,
         alignItems: 'center',
         justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#D3D3D3',
     },
     activeStep:{
-        backgroundColor: '#4A8481',
+        backgroundColor: '#5FA8A0',
+    },
+    activeStepText:{
+        color: '#FFF',
+        fontSize: 20,
+        fontWeight: 'bold',
     },
     stepText:{
-       color: '#FFF', 
-        fontSize: 12, 
-        fontWeight: 'bold', 
+        color: '#D3D3D3', 
+        fontSize: 20,  
     },
     subtitle:{
         fontSize: 16,
         color: '#333',
-        marginBottom: 10,
-        marginLeft: 10,
+        marginBottom: 0,
+        marginLeft: 30,
+        marginTop: 20,
     },
     formContainer:{
         backgroundColor: '#FFF',
         borderRadius: 10,
         padding: 15,
-        marginBottom: 20,
+        marginVertical: 20,
+        marginHorizontal: 20,
     },
     label:{
         fontSize: 14,
@@ -123,10 +149,11 @@ const styles = StyleSheet.create({
     },
     nextButton:{
         backgroundColor: '#4A8481',
-        borderRadius: 5,
+        borderRadius: 8,
         paddingVertical: 15,
         alignItems: 'center',
-        marginTop: 20,   
+        marginTop: 50,
+        marginHorizontal: 40,   
     },
     nextButtonText:{
         color: '#FFF',
