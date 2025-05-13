@@ -14,11 +14,20 @@ const NovoCasoScreen = () => {
             <Text style={styles.title}> Adicionar um Novo caso </Text>  {/* Título Principal */}
             {/* Indicadores de Etapa */}
             <View style={styles.stepIndicator}>
-                <View style={[styles.step, styles.activeStep]}/>
-                <View style={styles.step}/>
-                <View style={styles.step}/>
-                <View style={styles.step}/>
+                <View style={[styles.step, styles.activeStep]}>
+                    <Text style={styles.stepText}>1</Text>
+                </View>
+                <View style={styles.step}>
+                    <Text style={styles.stepText}>2</Text>
+                </View>
+                <View style={styles.step}>
+                    <Text style={styles.stepText}>3</Text>
+                </View>
+                <View style={styles.step}>
+                    <Text style={styles.stepText}>4</Text>
+                </View>
             </View>
+
             {/* Subtítulo */}
             <Text style={styles.subtitle}>Informações Iniciais do Caso</Text>
             {/* Container dos Campos */}
@@ -67,19 +76,27 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     step:{
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+        width: 30,
+        height: 30,
+        borderRadius: 20,
         backgroundColor: '#D3D3D3',
         marginHorizontal: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     activeStep:{
         backgroundColor: '#4A8481',
     },
+    stepText:{
+       color: '#FFF', 
+        fontSize: 12, 
+        fontWeight: 'bold', 
+    },
     subtitle:{
         fontSize: 16,
         color: '#333',
-        marginBottom: 20,
+        marginBottom: 10,
+        marginLeft: 10,
     },
     formContainer:{
         backgroundColor: '#FFF',
@@ -108,7 +125,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#4A8481',
         borderRadius: 5,
         paddingVertical: 15,
-        alignItems: 'center',   
+        alignItems: 'center',
+        marginTop: 20,   
     },
     nextButtonText:{
         color: '#FFF',
