@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Button } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import tw from 'twrnc';
@@ -8,35 +8,58 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const router = useRouter();
 
+  const { height, width } = Dimensions.get('window');
+  const isDesktop = height > 800;
+  const containerWidth = isDesktop ? '40%' : '100%';
+  const containerMarginHorizontal = isDesktop ? 16 : 0;
+
   const handleLogin = () => {
     console.log('Email:', email);
     console.log('Password:', password);
-
-    // Aqui poderia ter validação real
-router.replace('/(tabs)/home');
+    router.replace('/User'); // Corrigido para /User
   };
 
   return (
-    <View style={tw`flex-1 justify-center items-center bg-white p-4`}>
-      <Text style={tw`text-2xl font-bold mb-6`}>Login</Text>
-      
-      <TextInput
-        style={tw`w-72 h-12 border border-gray-300 rounded-md mb-4 px-4`}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={tw`w-72 h-12 border border-gray-300 rounded-md mb-6 px-4`}
-        placeholder="Senha"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-
-      <Button title="Entrar" onPress={handleLogin} />
+    <View style={tw`flex-1 bg-[#679AA3] justify-end`}>
+      <View style={tw`flex-row items-center justify-center mb-32`}>
+        <Image
+          source={require('../../assets/images/logo.png')}
+          style={tw`w-24 h-24 mr-4`}
+        />
+        <View>
+          <Text style={tw`text-4xl font-bold text-[#416C72] mb-2`}>ODX</Text>
+          <Text style={tw`text-2xl font-medium text-white`}>PERÍCIAS</Text>
+        </View>
+      </View>
+      <Text style={tw`text-white text-center mb-4`}>Faça login para acessar suas perícias</Text>
+      <View style={[tw`bg-white p-6`, { width: '100%', marginHorizontal: 0, borderTopLeftRadius: 25, borderTopRightRadius: 25 }]}>
+        <Text style={tw`text-gray-600 text-sm mb-2`}>Email</Text>
+        <TextInput
+          style={tw`w-full h-12 bg-gray-100 rounded-md mb-4 px-4 border border-gray-300`}
+          placeholder="Digite seu email"
+          placeholderTextColor="#888"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <Text style={tw`text-gray-600 text-sm mb-2`}>Senha</Text>
+        <TextInput
+          style={tw`w-full h-12 bg-gray-100 rounded-md mb-6 px-4 border border-gray-300`}
+          placeholder="Digite sua senha"
+          placeholderTextColor="#888"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        <TouchableOpacity
+          style={tw`w-full bg-[#416C72] py-3 rounded-md mb-2`}
+          onPress={handleLogin}
+        >
+          <Text style={tw`text-white text-center font-medium`}>Entrar</Text>
+        </TouchableOpacity>
+        <Text style={tw`text-[#416C72] text-center text-sm`}>Esqueci minha senha</Text>
+      </View>
     </View>
   );
 }
