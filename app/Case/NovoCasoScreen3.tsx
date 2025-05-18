@@ -8,6 +8,7 @@ import FormSection from '../../components/FormSection';
 
  const NovoCasoScreen3 = () => {
   const router = useRouter();
+  
   const handleNext = () => {
         router.push('/Case/NovoCasoScreen4');
     }
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
     fontSize: 16, 
     color: '#333', 
     marginBottom: 0, 
-    marginLeft: 30, 
+    textAlign: 'center',
     marginTop: 20 
   },
   nextButton: { 

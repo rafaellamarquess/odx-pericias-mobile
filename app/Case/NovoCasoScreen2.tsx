@@ -47,7 +47,7 @@ const NovoCasoScreen2 = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
-  subtitle: { fontSize: 16, color: '#333', marginBottom: 0, marginLeft: 30, marginTop: 20 },
+  subtitle: { fontSize: 16, color: '#333', marginBottom: 0, textAlign: 'center', marginTop: 20 },
   nextButton: { 
     backgroundColor: '#4A8481', 
     borderRadius: 8, 
