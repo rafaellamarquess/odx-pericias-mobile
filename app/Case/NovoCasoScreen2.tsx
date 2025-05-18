@@ -8,7 +8,9 @@ import FormSection from '../../components/FormSection';
 
 const NovoCasoScreen2 = () => {
   const router = useRouter();
-
+ const handleNext = () => {
+        router.push('/Case/NovoCasoScreen3');
+    }
   const fields = [
     {
       label: 'Status',
@@ -26,9 +28,7 @@ const NovoCasoScreen2 = () => {
     { label: 'Estado', placeholder: 'Digite o estado', name: 'state' },
   ];
 
-  const handleNext = () => {
-    Alert.alert('Próxima Etapa', 'A próxima tela ainda não foi implementada. Adicione uma rota (ex.: /case/NovoCasoScreen3) quando estiver pronta.');
-  };
+
 
   return (
     <View style={styles.container}>
