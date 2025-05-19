@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { useState } from "react";
 import tw from "twrnc";
-import { Ionicons as Icon } from "@expo/vector-icons"; // Ícones do Expo
+import { Ionicons as Icon } from "@expo/vector-icons";
 
 // Função principal
 export default function ElaborarRelatorio() {

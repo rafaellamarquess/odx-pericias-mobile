@@ -6,9 +6,6 @@ import styles from '../../styles/Dashboard';
 import { chartConfig } from '../../constants/Dashboard';
 import { ChartData } from 'react-native-chart-kit/dist/HelperTypes';
 
-
-
-
 interface ComparisonChartProps {
   chartData: ChartData; 
   chartWidth: number;
