@@ -6,11 +6,10 @@
     "noEmit": true,
     "skipLibCheck": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
+  
   "include": [
     "**/*.ts",
     "**/*.tsx",
