@@ -138,7 +138,7 @@ export default function ElaborarRelatorio() {
       {/* Conteúdo da etapa */}
       {renderConteudoEtapa()}
 
-      {/* Navegação (Próximo/Finalizar) */}
+      {/*(Próximo/Finalizar) */}
       {etapa < 5 && (
         <View style={tw`flex-row justify-between mt-10`}>
           <View style={tw`w-24`} />
