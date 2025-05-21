@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Audio } from "expo-av";
 import {
   View,
@@ -9,9 +9,20 @@ import {
   KeyboardAvoidingView,
   Platform,
   Modal,
+  Alert,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import tw from "twrnc";
 import { Ionicons as Icon } from "@expo/vector-icons";
+
+type Caso = {
+  id: string;
+  titulo: string;
+  evidencias: {
+    observacoesTexto: string;
+    observacaoId: string;
+  };
+};
 
 export default function ElaborarRelatorio() {
   const [etapa, setEtapa] = useState(1);
@@ -34,6 +45,10 @@ export default function ElaborarRelatorio() {
   const [gravacao, setGravacao] = useState<Audio.Recording | null>(null);
   const [audioUri, setAudioUri] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+
+  // Novos estados para casos
+  const [casosDisponiveis, setCasosDisponiveis] = useState<Caso[]>([]);
+  const [casoSelecionado, setCasoSelecionado] = useState<string | null>(null);
 
   const tituloEtapa: Record<number, string> = {
     1: "Informações Básicas",
@@ -62,33 +77,31 @@ export default function ElaborarRelatorio() {
     setFormData({ ...formData, [field]: value });
   };
 
+  // Gravação de áudio
   const iniciarGravacao = async () => {
     try {
       const { granted } = await Audio.requestPermissionsAsync();
       if (!granted) {
-        alert("Permissão de microfone negada.");
+        Alert.alert("Permissão de microfone negada.");
         return;
       }
-
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-
       const novaGravacao = new Audio.Recording();
-
       await novaGravacao.prepareToRecordAsync({
         android: {
           extension: ".m4a",
-          outputFormat: 2, // MPEG_4
-          audioEncoder: 3, // AAC
+          outputFormat: 2,
+          audioEncoder: 3,
           sampleRate: 44100,
           numberOfChannels: 2,
           bitRate: 128000,
         },
         ios: {
           extension: ".caf",
-          audioQuality: 2, // HIGH
+          audioQuality: 2,
           sampleRate: 44100,
           numberOfChannels: 2,
           bitRate: 128000,
@@ -101,9 +114,7 @@ export default function ElaborarRelatorio() {
           bitsPerSecond: 128000,
         },
       });
-
       await novaGravacao.startAsync();
-
       setGravacao(novaGravacao);
       setGravandoAudio(true);
     } catch (error) {
@@ -114,12 +125,10 @@ export default function ElaborarRelatorio() {
   const pararGravacao = async () => {
     try {
       if (!gravacao) return;
-
       await gravacao.stopAndUnloadAsync();
       const uri = gravacao.getURI();
-
       setAudioUri(uri);
-      setFormData({ ...formData, observacaoId: uri || "" });
+      setFormData((prev) => ({ ...prev, observacaoId: uri || "" }));
       setGravandoAudio(false);
       setGravacao(null);
     } catch (error) {
@@ -132,6 +141,95 @@ export default function ElaborarRelatorio() {
     const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
     await sound.playAsync();
   };
+
+  // Busca os casos da API ao montar o componente
+  useEffect(() => {
+    async function carregarCasos() {
+      try {
+        const res = await fetch("https://sua-api.com/casos"); // <— Aponte aqui para seu endpoint
+        const data: Caso[] = await res.json();
+        setCasosDisponiveis(data);
+      } catch (error) {
+        console.error("Erro ao carregar casos:", error);
+      }
+    }
+    carregarCasos();
+  }, []);
+
+  // Carrega evidências do caso selecionado
+  const carregarEvidenciasDoCaso = (casoId: string) => {
+    const caso = casosDisponiveis.find((c) => c.id === casoId);
+    if (!caso) return;
+    setFormData((prev) => ({
+      ...prev,
+      titulo: caso.titulo,
+      observacoesTexto: caso.evidencias.observacoesTexto,
+      observacaoId: caso.evidencias.observacaoId,
+    }));
+    setAudioUri(caso.evidencias.observacaoId);
+  };
+
+  // Novo dropdown usando Picker
+  const renderDropdownCasos = () => (
+    <View style={tw`mb-4`}>
+      <Text style={tw`text-zinc-700 font-semibold mb-2`}>
+        Selecionar um Caso
+      </Text>
+      <View style={tw`bg-white border border-zinc-300 rounded-lg`}>
+        <Picker
+          selectedValue={casoSelecionado}
+          onValueChange={(value) => {
+            setCasoSelecionado(value);
+            if (value) carregarEvidenciasDoCaso(value);
+          }}
+        >
+          <Picker.Item label="-- Selecione --" value={null} />
+          {casosDisponiveis.map((c) => (
+            <Picker.Item key={c.id} label={c.titulo} value={c.id} />
+          ))}
+        </Picker>
+      </View>
+    </View>
+  );
+
+  // Resto das renderizações originais (inputs, observações, bolinhas, etapas etc.)
+  const renderObservacoes = () => (
+    <View style={tw`mb-4`}>
+      <Text style={tw`text-zinc-700 font-semibold mb-2`}>Observações</Text>
+      <TextInput
+        style={tw`bg-white border border-zinc-300 rounded-lg px-4 py-3 text-zinc-800 h-24 mb-3`}
+        placeholder="Digite uma observação..."
+        placeholderTextColor="#9CA3AF"
+        value={formData.observacoesTexto}
+        onChangeText={(t) => handleChange("observacoesTexto", t)}
+        multiline
+        textAlignVertical="top"
+      />
+      <TouchableOpacity
+        onPress={gravandoAudio ? pararGravacao : iniciarGravacao}
+        style={tw`flex-row items-center justify-center bg-[#679AA3] px-4 py-3 rounded-lg`}
+      >
+        <Icon
+          name={gravandoAudio ? "stop-circle-outline" : "mic-outline"}
+          size={20}
+          color="#fff"
+          style={tw`mr-2`}
+        />
+        <Text style={tw`text-white font-semibold`}>
+          {gravandoAudio ? "Parar Gravação" : "Gravar Observação em Áudio"}
+        </Text>
+      </TouchableOpacity>
+      {audioUri && (
+        <TouchableOpacity
+          onPress={reproduzirAudio}
+          style={tw`flex-row items-center justify-center bg-green-600 px-4 py-2 rounded-lg mt-3`}
+        >
+          <Icon name="play-outline" size={20} color="#fff" style={tw`mr-2`} />
+          <Text style={tw`text-white font-semibold`}>Reproduzir Áudio</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
 
   const renderInput = (
     label: string,
@@ -155,50 +253,44 @@ export default function ElaborarRelatorio() {
     </View>
   );
 
-  const renderObservacoes = () => (
-    <View style={tw`mb-4`}>
-      <Text style={tw`text-zinc-700 font-semibold mb-2`}>Observações</Text>
-      <TextInput
-        style={tw`bg-white border border-zinc-300 rounded-lg px-4 py-3 text-zinc-800 h-24 mb-3`}
-        placeholder="Digite uma observação..."
-        placeholderTextColor="#9CA3AF"
-        value={formData.observacoesTexto}
-        onChangeText={(text) => handleChange("observacoesTexto", text)}
-        multiline
-        textAlignVertical="top"
-      />
-
-      <TouchableOpacity
-        onPress={gravandoAudio ? pararGravacao : iniciarGravacao}
-        style={tw`flex-row items-center justify-center bg-[#679AA3] px-4 py-3 rounded-lg`}
-      >
-        <Icon
-          name={gravandoAudio ? "stop-circle-outline" : "mic-outline"}
-          size={20}
-          color="#fff"
-          style={tw`mr-2`}
-        />
-        <Text style={tw`text-white font-semibold`}>
-          {gravandoAudio ? "Parar Gravação" : "Gravar Observação em Áudio"}
-        </Text>
-      </TouchableOpacity>
-
-      {audioUri && (
-        <TouchableOpacity
-          onPress={reproduzirAudio}
-          style={tw`flex-row items-center justify-center bg-green-600 px-4 py-2 rounded-lg mt-3`}
-        >
-          <Icon name="play-outline" size={20} color="#fff" style={tw`mr-2`} />
-          <Text style={tw`text-white font-semibold`}>Reproduzir Áudio</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
+  const renderBolinhas = () => {
+    if (etapa === 5) return null;
+    const totalEtapas = 4;
+    return (
+      <View style={tw`flex-row justify-center my-6`}>
+        {Array.from({ length: totalEtapas }, (_, i) => {
+          const index = i + 1;
+          const ativa = index === etapa;
+          return (
+            <View
+              key={`bolinha-${index}`}
+              style={tw.style(
+                "w-8 h-8 rounded-full border flex items-center justify-center mx-1",
+                ativa
+                  ? "bg-[#679AA3] border-[#679AA3]"
+                  : "bg-transparent border-zinc-400"
+              )}
+            >
+              <Text
+                style={tw.style(
+                  "font-semibold",
+                  ativa ? "text-white" : "text-zinc-400"
+                )}
+              >
+                {index}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
 
   const renderConteudoEtapa = () => (
     <View style={tw`bg-white rounded-xl p-4 shadow-md`}>
       {etapa === 1 && (
         <>
+          {renderDropdownCasos()}
           {renderInput("Título", "Informe o título do relatório", "titulo")}
           {renderInput("Descrição", "Descreva o relatório", "descricao", true)}
         </>
@@ -265,9 +357,7 @@ export default function ElaborarRelatorio() {
           </Text>
           {Object.entries(formData).map(([key, value]) => (
             <View key={key} style={tw`mb-2`}>
-              <Text style={tw`text-zinc-500 text-sm`}>
-                {nomesCampos[key] || key}
-              </Text>
+              <Text style={tw`text-zinc-500 text-sm`}>{nomesCampos[key]}</Text>
               <Text style={tw`text-zinc-800 font-semibold`}>
                 {value || "Não preenchido"}
               </Text>
@@ -278,42 +368,9 @@ export default function ElaborarRelatorio() {
     </View>
   );
 
-  const renderBolinhas = () => {
-    if (etapa === 5) return null;
-    const totalEtapas = 4;
-
-    return (
-      <View style={tw`flex-row justify-center my-6`}>
-        {Array.from({ length: totalEtapas }, (_, i) => {
-          const index = i + 1;
-          const ativa = index === etapa;
-          return (
-            <View
-              key={`bolinha-${index}`}
-              style={tw.style(
-                "w-8 h-8 rounded-full border flex items-center justify-center mx-1",
-                ativa
-                  ? "bg-[#679AA3] border-[#679AA3]"
-                  : "bg-transparent border-zinc-400"
-              )}
-            >
-              <Text
-                style={tw.style(
-                  "font-semibold",
-                  ativa ? "text-white" : "text-zinc-400"
-                )}
-              >
-                {index}
-              </Text>
-            </View>
-          );
-        })}
-      </View>
-    );
-  };
-
   return (
     <View style={tw`flex-1`}>
+      {/* Header */}
       <View
         style={tw`bg-[#679AA3] rounded-b-lg px-6 py-9 flex-row items-center justify-between`}
       >
@@ -323,12 +380,14 @@ export default function ElaborarRelatorio() {
         <Icon name="document-text-outline" size={28} color="#fff" />
       </View>
 
+      {/* Conteúdo principal */}
       <KeyboardAvoidingView
         style={tw`flex-1 bg-zinc-100`}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={100}
       >
         <ScrollView contentContainerStyle={tw`p-6 pb-20`}>
+          {/* Navegação etapas */}
           <View style={tw`flex-row items-center justify-between mb-2`}>
             {etapa < 5 ? (
               <TouchableOpacity
@@ -343,7 +402,6 @@ export default function ElaborarRelatorio() {
             ) : (
               <View />
             )}
-
             {etapa === 5 && (
               <TouchableOpacity
                 onPress={() => {
@@ -371,21 +429,24 @@ export default function ElaborarRelatorio() {
             )}
           </View>
 
+          {/* Indicador de etapas */}
           {renderBolinhas()}
 
+          {/* Título da etapa */}
           {etapa < 5 && (
             <Text style={tw`text-xl font-bold text-zinc-800 mb-6`}>
               {tituloEtapa[etapa]}
             </Text>
           )}
 
+          {/* Conteúdo da etapa */}
           {etapa === 5 ? (
             <View style={tw`items-center justify-center mt-20`}>
               <Text style={tw`text-2xl text-zinc-800 text-center mb-4`}>
                 Você finalizou a elaboração do relatório com sucesso!
               </Text>
               <TouchableOpacity
-                style={tw`bg-[#679AA3] px-6 py-3 rounded-lg`}
+                style={tw`bg-[#679AA3] px-6 py-3 rounded-lg mb-3`}
                 onPress={() => setModalVisible(true)}
               >
                 <Text style={tw`text-white font-semibold`}>Gerar PDF</Text>
@@ -395,6 +456,7 @@ export default function ElaborarRelatorio() {
             renderConteudoEtapa()
           )}
 
+          {/* Botões Próximo/Finalizar */}
           {etapa < 5 && (
             <View style={tw`flex-row justify-between mt-10`}>
               <View style={tw`w-24`} />
@@ -411,6 +473,7 @@ export default function ElaborarRelatorio() {
         </ScrollView>
       </KeyboardAvoidingView>
 
+      {/* Modal de visualização de PDF */}
       <Modal visible={modalVisible} animationType="slide">
         <View style={tw`flex-1`}>
           <View
