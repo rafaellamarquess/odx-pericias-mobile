@@ -1,5 +1,7 @@
 import { ChartConfig } from 'react-native-chart-kit/dist/HelperTypes';
 import { FiltroKey, DashboardData } from '@/Types/Dashboards';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUsers, faClipboard, faChartBar, faSearch, faGlobe, IconDefinition, faChartLine, faFolder, faMicroscope} from '@fortawesome/free-solid-svg-icons';
 
 const dadosFicticios: DashboardData = {
   totalCasos: 0,
@@ -34,12 +36,12 @@ const filtros: { label: string; key: FiltroKey }[] = [
   { label: 'Cidade', key: 'cidade' },
 ];
 
-const navButtons: { label: string; icon: string }[] = [
-  { label: 'Gestão de Usuários', icon: '👥' },
-  { label: 'Novo Caso', icon: '📋' },
-  { label: 'Elaborar Relatório', icon: '📊' },
-  { label: 'Nova Evidência', icon: '🔍' },
-  { label: 'Gestão Geral', icon: '🌐' },
+const navButtons: { label: string; icon: IconDefinition }[] = [
+  { label: 'Gestão de Usuários', icon: faUsers },
+  { label: 'Novo Caso', icon: faClipboard },
+  { label: 'Elaborar Relatório', icon: faChartLine },
+  { label: 'Nova Evidência', icon: faMicroscope },
+  { label: 'Gestão Geral', icon: faFolder },
 ];
 
 const chartConfig: ChartConfig = {
