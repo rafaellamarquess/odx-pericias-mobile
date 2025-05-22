@@ -57,14 +57,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#D3D3D3',
   },
   backButton: {
-    marginRight: 0,
+    marginLeft: 15,
   },
   stepIndicator: {
     flexDirection: 'row',
     justifyContent: 'center',
     flex: 1,
     marginVertical: 0,
-    marginRight: 20,
+    marginRight: 35,
   },
   step: {
     width: 40,

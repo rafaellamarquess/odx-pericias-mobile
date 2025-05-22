@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import Header from '../../components/Header';
-import StepIndicator from '../../components/StepIndicator';
+import Header from '../../components/case/NovoCasoScreen/Header';
+import StepIndicator from '../../components/case/NovoCasoScreen/StepIndicator';
 
 
 const NovoCasoScreen4 = () => {
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   nextButton: { 
-    backgroundColor: '#4A8481', 
+    backgroundColor: '#679AA3',
     borderRadius: 8, 
     paddingVertical: 15, 
     alignItems: 'center', 

@@ -1,10 +1,10 @@
 import React, {useState } from "react";
 import {View, Text, TextInput, TouchableOpacity, StyleSheet} from "react-native"
 import { useRouter } from 'expo-router';
-import Header from '../../components/Header';
-import StepIndicator from '../../components/StepIndicator';
-import FormContainer from '../../components/FormContainer';
-import FormSection from '../../components/FormSection';
+import Header from '../../components/case/NovoCasoScreen/Header';
+import StepIndicator from '../../components/case/NovoCasoScreen/StepIndicator';
+import FormContainer from '../../components/case/NovoCasoScreen/FormContainer';
+import FormSection from '../../components/case/NovoCasoScreen/FormSection';
 
 const NovoCasoScreen = () => {
     // Estado para armazenar o título e a descrição
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     nextButton:{
-        backgroundColor: '#4A8481',
+        backgroundColor: '#679AA3',
         borderRadius: 8,
         paddingVertical: 15,
         alignItems: 'center',

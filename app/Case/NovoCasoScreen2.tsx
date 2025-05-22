@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import Header from '../../components/Header';
-import StepIndicator from '../../components/StepIndicator';
-import FormContainer from '../../components/FormContainer';
-import FormSection from '../../components/FormSection';
+import Header from '../../components/case/NovoCasoScreen/Header';
+import StepIndicator from '../../components/case/NovoCasoScreen/StepIndicator';
+import FormContainer from '../../components/case/NovoCasoScreen/FormContainer';
+import FormSection from '../../components/case/NovoCasoScreen/FormSection';
 
 const NovoCasoScreen2 = () => {
   const router = useRouter();
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
   subtitle: { fontSize: 16, color: '#333', marginBottom: 0, textAlign: 'center', marginTop: 20 },
   nextButton: { 
-    backgroundColor: '#4A8481', 
+    backgroundColor: '#679AA3', 
     borderRadius: 8, 
     paddingVertical: 15, 
     alignItems: 'center', 
