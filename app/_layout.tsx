@@ -36,7 +36,7 @@ export default function RootLayout() {
         <Stack.Screen name="Case/NovoCasoScreen2" options={{ headerShown: false }} />
         <Stack.Screen name="Case/NovoCasoScreen3" options={{ headerShown: false }} />
         <Stack.Screen name="Case/NovoCasoScreen4" options={{ headerShown: false }} />
-        <Stack.Screen name="Case/GestaoCasosScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="Case/NovoCasoScreen" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

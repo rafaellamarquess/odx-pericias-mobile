@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TextInput } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import tw from 'twrnc';
 
 // Definindo tipos específicos para cada tipo de campo
 type TextField = {
@@ -28,7 +29,7 @@ type FormSectionProps = {
   onChange?: (name: string, value: string) => void; // Função para atualizar valores
 };
 
-const FormSection = ({ fields, onChange }: FormSectionProps) => {
+const FormSection: React.FC<FormSectionProps> = ({ fields, onChange }) => {
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
 
   const handleChange = (name: string, value: string) => {
@@ -42,13 +43,13 @@ const FormSection = ({ fields, onChange }: FormSectionProps) => {
     <View>
       {fields.map((field) => (
         <View key={field.name}>
-          <Text style={styles.label}>{field.label}</Text>
+          <Text style={tw`text-[14px] text-[#333] mb-[5px]`}>{field.label}</Text>
           {field.type === 'select' ? (
-            <View style={styles.pickerContainer}>
+            <View style={tw`border border-[#D3D3D3] rounded-[5px] mb-[15px]`}>
               <Picker
                 selectedValue={formData[field.name] || ''}
                 onValueChange={(itemValue) => handleChange(field.name, itemValue)}
-                style={styles.picker}
+                style={tw`h-[50px] text-[14px]`}
               >
                 <Picker.Item label={field.placeholder} value="" color="#999" />
                 {(field as SelectField).options.map((option) => (
@@ -58,7 +59,10 @@ const FormSection = ({ fields, onChange }: FormSectionProps) => {
             </View>
           ) : (
             <TextInput
-              style={[styles.input, (field as TextField).multiline === true && styles.multilineInput]}
+              style={tw.style(
+                `border border-[#D3D3D3] rounded-[5px] p-[10px] text-[14px] mb-[15px]`,
+                (field as TextField).multiline === true && `h-[100px] text-align-vertical-top`
+              )}
               placeholder={field.placeholder}
               placeholderTextColor="#999"
               value={formData[field.name] || ''}
@@ -71,35 +75,5 @@ const FormSection = ({ fields, onChange }: FormSectionProps) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  label: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#D3D3D3',
-    borderRadius: 5,
-    padding: 10,
-    fontSize: 14,
-    marginBottom: 15,
-  },
-  multilineInput: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#D3D3D3',
-    borderRadius: 5,
-    marginBottom: 15,
-  },
-  picker: {
-    height: 50,
-    fontSize: 14,
-  },
-});
 
 export default FormSection;
