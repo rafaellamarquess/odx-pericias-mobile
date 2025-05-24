@@ -1,29 +1,30 @@
 import { ChartConfig } from 'react-native-chart-kit/dist/HelperTypes';
 import { FiltroKey, DashboardData } from '@/Types/Dashboards';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUsers, faClipboard, faChartBar, faSearch, faGlobe, IconDefinition, faChartLine, faFolder, faMicroscope} from '@fortawesome/free-solid-svg-icons';
+import { faUsers, faClipboard, faChartBar, faSearch, faGlobe, IconDefinition, faChartLine, faFolder, faMicroscope } from '@fortawesome/free-solid-svg-icons';
 
 const dadosFicticios: DashboardData = {
   totalCasos: 0,
+  casosPorMes: [],
   vitima: [
-    { categoria: 'Tipo A', quantidade: 50 },
-    { categoria: 'Tipo B', quantidade: 100 },
+    { categoria: 'Tipo A', quantidade: 50, tipoGrafico: 'pizza' },
+    { categoria: 'Tipo B', quantidade: 100, tipoGrafico: 'pizza' },
   ],
   sexo: [
-    { categoria: 'Masculino', quantidade: 80 },
-    { categoria: 'Feminino', quantidade: 70 },
+    { categoria: 'Masculino', quantidade: 80, tipoGrafico: 'pizza' },
+    { categoria: 'Feminino', quantidade: 70, tipoGrafico: 'pizza' },
   ],
   estado: [
-    { categoria: 'Estado 1', quantidade: 60 },
-    { categoria: 'Estado 2', quantidade: 90 },
+    { categoria: 'Estado 1', quantidade: 60, tipoGrafico: 'barra' },
+    { categoria: 'Estado 2', quantidade: 90, tipoGrafico: 'barra' },
   ],
   lesoes: [
-    { categoria: 'Lesão 1', quantidade: 40 },
-    { categoria: 'Lesão 2', quantidade: 110 },
+    { categoria: 'Lesão 1', quantidade: 40, tipoGrafico: 'barra' },
+    { categoria: 'Lesão 2', quantidade: 110, tipoGrafico: 'barra' },
   ],
   cidade: [
-    { categoria: 'Cidade A', quantidade: 90 },
-    { categoria: 'Cidade B', quantidade: 60 },
+    { categoria: 'Cidade A', quantidade: 90, tipoGrafico: 'dispersao' },
+    { categoria: 'Cidade B', quantidade: 60, tipoGrafico: 'dispersao' },
   ],
 };
 
@@ -58,6 +59,7 @@ const chartConfig: ChartConfig = {
   propsForLabels: {
     fontSize: 12,
   },
+  propsForDots: { r: '6', strokeWidth: '2', stroke: '#fff' }, // Para dispersão
 };
 
 export { dadosFicticios, filtros, navButtons, chartConfig };
