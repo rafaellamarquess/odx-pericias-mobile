@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollView, SafeAreaView } from 'react-native';
+import { View, TextInput, TouchableOpacity, FlatList, StyleSheet, SafeAreaView, Alert, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../../components/case/NovoCasoScreen/Header';
 import { useRouter } from 'expo-router';
@@ -8,7 +8,6 @@ import StatusFilter from '../../components/case/GestaoCasosScreen/StatusFilter';
 import CaseList from '../../components/case/GestaoCasosScreen/CaseList';
 import FloatingActionButton from '../../components/case/GestaoCasosScreen/FloatingActionButton';
 
-
 // Interface para tipar os casos
 interface Case {
   id: string;
@@ -16,17 +15,22 @@ interface Case {
   reference: string;
   status: string;
   creationDate: string;
+  responsible: string;
+  description?: string;
+  city?: string;
+  state?: string;
+  evidence?: string;
 }
 
 const GestaoCasosScreen = () => {
   const router = useRouter();
-  const [searchText, setSearchText] = useState<string>(''); // Estado para a pesquisa
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null); // Estado para o filtro por status
-  const [filteredCases, setFilteredCases] = useState<any[]>([]); // Estado para os casos filtrados
+  const [searchText, setSearchText] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const statusOptions = ['Em andamento', 'Arquivado', 'Finalizado'];
+  const [activeCaseId, setActiveCaseId] = useState<string | null>(null);
 
-  // Mock de dados para simular casos (vamos substituir pelo backend depois)
-  const [cases, setCases] = useState([
+  const [cases, setCases] = useState<Case[]>([
     {
       id: '1',
       title: 'Caso Exemplo 1',
@@ -53,36 +57,21 @@ const GestaoCasosScreen = () => {
     },
   ]);
 
-  // Inicializa os casos filtrados com todos os casos ao carregar a tela
   useEffect(() => {
     setFilteredCases(cases);
   }, [cases]);
 
-  // TODO: Integrar com o backend - Buscar casos do usuário autenticado
   useEffect(() => {
     // Simula a busca de casos do backend
-    // Exemplo de requisição futura:
-    // fetch('/api/casos', {
-    //   method: 'GET',
-    //   headers: {
-    //     Authorization: `Bearer ${userToken}`, // Token do usuário autenticado
-    //   },
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => setCases(data))
-    //   .catch((error) => console.error('Erro ao buscar casos:', error));
   }, []);
 
-  // Filtragem dos casos com base no status e na pesquisa
   useEffect(() => {
-    let filtered = [...cases]; // Faz uma cópia dos casos originais
+    let filtered = [...cases];
 
-    // Filtrar por status, se houver um status selecionado
     if (selectedStatus) {
       filtered = filtered.filter((caseItem) => caseItem.status === selectedStatus);
     }
 
-    // Filtrar por texto de pesquisa (título ou referência)
     if (searchText.trim()) {
       filtered = filtered.filter(
         (caseItem) =>
@@ -92,50 +81,71 @@ const GestaoCasosScreen = () => {
     }
 
     setFilteredCases(filtered);
-
-    // TODO: Integrar com o backend - Filtragem pode ser feita no backend
-    // Exemplo: Adicionar parâmetros na requisição GET
-    // const queryParams = selectedStatus ? `status=${selectedStatus}` : '';
-    // const searchQuery = searchText.trim() ? `&search=${searchText}` : '';
-    // fetch(`/api/casos?${queryParams}${searchQuery}`, {
-    //   method: 'GET',
-    //   headers: {
-    //     Authorization: `Bearer ${userToken}`,
-    //   },
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => setFilteredCases(data))
-    //   .catch((error) => console.error('Erro ao filtrar casos:', error));
   }, [cases, selectedStatus, searchText]);
 
-  // Função para alternar o filtro de status
   const toggleStatusFilter = (status: string) => {
     if (selectedStatus === status) {
-      setSelectedStatus(null); // Desmarca o filtro, voltando a mostrar todos os casos
+      setSelectedStatus(null);
     } else {
-      setSelectedStatus(status); // Aplica o filtro
+      setSelectedStatus(status);
     }
   };
 
+  const handleDelete = (id: string) => {
+    Alert.alert('Confirmar Exclusão', 'Deseja realmente excluir este caso?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Excluir', style: 'destructive', onPress: () => {
+        setCases(cases.filter(c => c.id !== id));
+        setFilteredCases(filteredCases.filter(c => c.id !== id));
+        setActiveCaseId(null);
+      } },
+    ]);
+  };
 
+  const handleEdit = (id: string, updatedCase: Case) => {
+    setCases(cases.map(c => c.id === id ? { ...c, ...updatedCase } : c));
+    setFilteredCases(filteredCases.map(c => c.id === id ? { ...c, ...updatedCase } : c));
+    // TODO: Integração com backend - Enviar updatedCase para o endpoint de atualização
+    // Exemplo de chamada com fetch:
+    // fetch(`https://your-backend-api.com/cases/${id}`, {
+    //   method: 'PUT',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(updatedCase),
+    // })
+    // .then(response => response.json())
+    // .then(data => console.log('Caso atualizado:', data))
+    // .catch(error => console.error('Erro ao atualizar:', error));
+  };
+
+  const onLongPress = (id: string) => {
+    setActiveCaseId(id === activeCaseId ? null : id);
+  };
+
+  const onOutsidePress = () => {
+    setActiveCaseId(null);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* Usando o componente Header */}
-        <Header title="GESTÃO DE CASOS" />
-        {/* Usando o componente SearchBar */}
-        <SearchBar searchText={searchText} setSearchText={setSearchText} />
-        {/* Usando o componente StatusFilter */}
-        <StatusFilter
-          statusOptions={statusOptions}
-          selectedStatus={selectedStatus}
-          toggleStatusFilter={toggleStatusFilter}
-        />
-        {/* Usando o componente CaseList */}
-       <CaseList filteredCases={filteredCases} />
-      </View>
-      {/* Usando o componente FloatingActionButton */}
+      <TouchableWithoutFeedback onPress={onOutsidePress}>
+        <View style={styles.content}>
+          <Header title="GESTÃO DE CASOS" />
+          <SearchBar searchText={searchText} setSearchText={setSearchText} />
+          <StatusFilter
+            statusOptions={statusOptions}
+            selectedStatus={selectedStatus}
+            toggleStatusFilter={toggleStatusFilter}
+          />
+          <CaseList
+            filteredCases={filteredCases}
+            onDelete={handleDelete}
+            onEdit={handleEdit}
+            activeCaseId={activeCaseId}
+            onLongPress={onLongPress}
+            onOutsidePress={onOutsidePress}
+          />
+        </View>
+      </TouchableWithoutFeedback>
       <FloatingActionButton />
     </SafeAreaView>
   );

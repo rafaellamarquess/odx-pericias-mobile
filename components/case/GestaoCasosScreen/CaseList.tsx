@@ -1,48 +1,47 @@
-import React, { useCallback } from 'react';
-import { FlatList, Text, StyleSheet } from 'react-native';
-import CaseItem from '../GestaoCasosScreen/CaseItem';
+import React from 'react';
+import { View, FlatList } from 'react-native';
+import CaseItem from './CaseItem/CaseItem';
 
-// Interface para tipar os casos
 interface Case {
   id: string;
   title: string;
+  reference: string;
   status: string;
   creationDate: string;
   responsible: string;
+  description?: string;
+  city?: string;
+  state?: string;
+  evidence?: string;
 }
 
-type CaseListProps = {
+interface CaseListProps {
   filteredCases: Case[];
-};
+  onDelete: (id: string) => void;
+  onEdit: (id: string, updatedCase: Case) => void; // Ajustado para aceitar dois parâmetros
+  activeCaseId: string | null;
+  onLongPress: (id: string) => void;
+  onOutsidePress: () => void;
+}
 
-const CaseList: React.FC<CaseListProps> = ({ filteredCases }) => {
-  const renderItem = useCallback(
-    ({ item }: { item: Case }) => <CaseItem item={item} />,
-    []
-  );
-
+const CaseList: React.FC<CaseListProps> = ({ filteredCases, onDelete, onEdit, activeCaseId, onLongPress, onOutsidePress }) => {
   return (
     <FlatList
       data={filteredCases}
-      renderItem={renderItem}
       keyExtractor={(item) => item.id}
-      style={styles.caseList}
-      ListEmptyComponent={<Text style={styles.emptyText}>Nenhum caso encontrado.</Text>}
+      renderItem={({ item }) => (
+        <CaseItem
+          caseItem={item}
+          onDelete={onDelete}
+          onEdit={onEdit} // Agora compatível com a interface
+          isOptionsVisible={activeCaseId === item.id}
+          onLongPress={onLongPress}
+          onOutsidePress={onOutsidePress}
+        />
+      )}
+      contentContainerStyle={{ paddingBottom: 60 }} // Espaço para o FloatingActionButton
     />
   );
 };
-
-const styles = StyleSheet.create({
-  caseList: {
-    flex: 1,
-    marginHorizontal: 20, // Removido o margin para ocupar a largura total
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-});
 
 export default CaseList;
