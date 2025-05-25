@@ -2,14 +2,13 @@ import React from 'react';
 import { View } from 'react-native';
 import tw from 'twrnc';
 
-// Define a tipagem para as props
-type FormContainerProps = {
-  children: React.ReactNode;
-};
-
-const FormContainer: React.FC<FormContainerProps> = ({ children }) => {
+const FormContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <View style={tw`bg-white rounded-[10px] p-[15px] my-5 mx-5`}>
+    <View
+      style={tw`bg-white rounded-[15px] p-4 mx-5 my-3 shadow-lg`} // Adiciona sombra e arredondamento
+      // elevation: 5 adiciona sombra no Android
+      // shadow-lg adiciona sombra no iOS
+    >
       {children}
     </View>
   );

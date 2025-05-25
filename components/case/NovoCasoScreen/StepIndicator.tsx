@@ -9,7 +9,8 @@ type StepIndicatorProps = {
   setEtapa: (etapa: number) => void;
 };
 
-const StepIndicator: React.FC<StepIndicatorProps> = ({ activeStep = 1, setEtapa }) => {
+const StepIndicator: React.FC<StepIndicatorProps> = ({ activeStep, setEtapa }) => {
+  const steps = [1, 2, 3];
   const router = useRouter();
 
   const goBack = () => {
@@ -21,24 +22,43 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ activeStep = 1, setEtapa 
   };
 
   return (
-    <View style={tw`flex-row items-center px-2.5 py-2.5 bg-[#F5F5F5] border-b border-[#D3D3D3]`}>
-      <TouchableOpacity style={tw`ml-[15px]`} onPress={goBack}>
+    <View style={tw`flex-row items-center my-0`}>
+      <TouchableOpacity style={tw`pl-2 mr-6 ml-5`} onPress={goBack}> {/* Botão de voltar à esquerda */}
         <Ionicons name="arrow-back" size={24} color="#333" />
       </TouchableOpacity>
-      <View style={tw`flex-row justify-center flex-1 my-0 mr-[35px]`}>
-        <View style={tw.style(`w-10 h-10 rounded-full bg-white mx-2 items-center justify-center border border-[#D3D3D3]`, activeStep === 1 && `bg-[#5FA8A0]`)}>
-          <Text style={tw.style(`text-[#D3D3D3] text-xl`, activeStep === 1 && `text-white font-bold`)}>1</Text>
-        </View>
-        <View style={tw.style(`w-10 h-10 rounded-full bg-white mx-2 items-center justify-center border border-[#D3D3D3]`, activeStep === 2 && `bg-[#5FA8A0]`)}>
-          <Text style={tw.style(`text-[#D3D3D3] text-xl`, activeStep === 2 && `text-white font-bold`)}>2</Text>
-        </View>
-        <View style={tw.style(`w-10 h-10 rounded-full bg-white mx-2 items-center justify-center border border-[#D3D3D3]`, activeStep === 3 && `bg-[#5FA8A0]`)}>
-          <Text style={tw.style(`text-[#D3D3D3] text-xl`, activeStep === 3 && `text-white font-bold`)}>3</Text>
-        </View>
-        <View style={tw.style(`w-10 h-10 rounded-full bg-white mx-2 items-center justify-center border border-[#D3D3D3]`, activeStep === 4 && `bg-[#5FA8A0]`)}>
-          <Text style={tw.style(`text-[#D3D3D3] text-xl`, activeStep === 4 && `text-white font-bold`)}>4</Text>
-        </View>
-      </View>
+      {steps.map((step, index) => (
+        <React.Fragment key={step}>
+          <TouchableOpacity
+            onPress={() => setEtapa(step)} // Mantém a funcionalidade de voltar ou avançar ao clicar
+            disabled={step > activeStep} // Desabilita steps futuros
+            style={[
+              tw`w-10 h-10 rounded-full justify-center items-center shadow-md`,
+              activeStep === step
+                ? tw`bg-[#27AE60] shadow-lg elevation-8`
+                : step > activeStep
+                ? tw`bg-[#E0E0E0] opacity-50` // Estilo para steps futuros (opacidade reduzida)
+                : tw`bg-[#E0E0E0]`,
+            ]}
+          >
+            <Text
+              style={[
+                tw`text-[16px] font-semibold`,
+                activeStep === step ? tw`text-white` : tw`text-[#666]`,
+              ]}
+            >
+              {step}
+            </Text>
+          </TouchableOpacity>
+          {index < steps.length - 1 && (
+            <View
+              style={[
+                tw`w-12 h-1`,
+                activeStep > step ? tw`bg-[#27AE60]` : tw`bg-[#E0E0E0]`,
+              ]}
+            />
+          )}
+        </React.Fragment>
+      ))}
     </View>
   );
 };

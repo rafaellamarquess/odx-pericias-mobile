@@ -7,7 +7,7 @@ const FloatingActionButton: React.FC = () => {
   const router = useRouter();
 
   return (
-    <TouchableOpacity style={styles.fab} onPress={() => router.push('/Case/NovoCasoScreen1')}>
+    <TouchableOpacity style={styles.fab} onPress={() => router.push('/Case/NovoCasoScreen')}>
       <Ionicons name="add" size={24} color="#FFF" />
     </TouchableOpacity>
   );

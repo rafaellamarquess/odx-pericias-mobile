@@ -1,73 +1,42 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TextInput } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import tw from 'twrnc';
 
-// Definindo tipos específicos para cada tipo de campo
-type TextField = {
+type FormField = {
   label: string;
   placeholder: string;
   name: string;
-  type?: 'text';
   multiline?: boolean;
+  type?: 'text' | 'select';
+  options?: { label: string; value: string }[];
 };
 
-type SelectField = {
-  label: string;
-  placeholder: string;
-  name: string;
-  type: 'select';
-  options: { label: string; value: string }[];
-};
-
-// Um campo pode ser TextField ou SelectField
-type Field = TextField | SelectField;
-
-// Definindo o tipo das propriedades do componente
 type FormSectionProps = {
-  fields: Field[];
-  onChange?: (name: string, value: string) => void; // Função para atualizar valores
+  fields: FormField[];
+  onChange: (name: string, value: string) => void;
 };
 
 const FormSection: React.FC<FormSectionProps> = ({ fields, onChange }) => {
-  const [formData, setFormData] = useState<{ [key: string]: string }>({});
-
-  const handleChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (onChange) {
-      onChange(name, value); // Chama a função onChange passada pelo pai
-    }
-  };
-
   return (
-    <View>
+    <View style={tw`space-y-4`}> {/* Espaçamento entre os campos */}
       {fields.map((field) => (
-        <View key={field.name}>
-          <Text style={tw`text-[14px] text-[#333] mb-[5px]`}>{field.label}</Text>
+        <View key={field.name} style={tw` rounded-[10px] p-3 shadow-sm`}> {/* Sombra leve e fundo claro */}
+          <Text style={tw`text-[14px] text-[#2C3E50] font-semibold mb-1`}>{field.label}</Text>
           {field.type === 'select' ? (
-            <View style={tw`border border-[#D3D3D3] rounded-[5px] mb-[15px]`}>
-              <Picker
-                selectedValue={formData[field.name] || ''}
-                onValueChange={(itemValue) => handleChange(field.name, itemValue)}
-                style={tw`h-[50px] text-[14px]`}
-              >
-                <Picker.Item label={field.placeholder} value="" color="#999" />
-                {(field as SelectField).options.map((option) => (
-                  <Picker.Item key={option.value} label={option.label} value={option.value} />
-                ))}
-              </Picker>
-            </View>
+            // Aqui você pode implementar um componente de seleção (ex.: Picker ou Dropdown)
+            <TextInput
+              style={tw`text-[14px] text-[#666] bg-sky-50 rounded-[8px] p-2 shadow-sm`} // Input estilizado
+              placeholder={field.placeholder}
+              onChangeText={(value) => onChange(field.name, value)}
+              editable={false} // Placeholder para select (substituir por um Picker real)
+            />
           ) : (
             <TextInput
-              style={tw.style(
-                `border border-[#D3D3D3] rounded-[5px] p-[10px] text-[14px] mb-[15px]`,
-                (field as TextField).multiline === true && `h-[100px] text-align-vertical-top`
-              )}
+              style={tw`text-[14px] text-[#666] bg-sky-50 rounded-[8px] p-2 shadow-sm`} // Input estilizado
               placeholder={field.placeholder}
-              placeholderTextColor="#999"
-              value={formData[field.name] || ''}
-              onChangeText={(text) => handleChange(field.name, text)}
-              multiline={(field as TextField).multiline === true}
+              onChangeText={(value) => onChange(field.name, value)}
+              multiline={field.multiline}
+              numberOfLines={field.multiline ? 4 : 1}
             />
           )}
         </View>

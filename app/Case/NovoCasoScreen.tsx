@@ -6,6 +6,8 @@ import Header from '../../components/case/NovoCasoScreen/Header';
 import FormContainer from '../../components/case/NovoCasoScreen/FormContainer';
 import FormSection from '../../components/case/NovoCasoScreen/FormSection';
 import StepIndicator from '../../components/case/NovoCasoScreen/StepIndicator';
+import ConfirmSaveModal from '../../components/case/NovoCasoScreen/Modals/ConfirmSaveModal';
+import AddEvidenceModal from '../../components/case/NovoCasoScreen/Modals/AddEvidenceModal';
 
 const NovoCasoScreen = () => {
   const router = useRouter();
@@ -29,6 +31,10 @@ const NovoCasoScreen = () => {
     hasEvidence: '',
     evidence: '',
   });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showEvidenceModal, setShowEvidenceModal] = useState(false);
 
  const handleInputChange = (name: string, value: string) => {
     // Mapear o nome para as chaves de formData
@@ -54,21 +60,24 @@ const NovoCasoScreen = () => {
   };
 
   const handleNext = () => {
-    if (etapa < 4) {
+    if (etapa < 3) {
       setEtapa(etapa + 1);
     } else {
       handleRegister();
     }
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-
   const handleRegister = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      router.push('/home' as any);
+      setShowConfirmModal(true);// Mostra o primeiro modal
     }, 2000);
+  };
+
+  const handleCloseConfirmModal = () => {
+    setShowConfirmModal(false);
+    setShowEvidenceModal(true); // Mostra o segundo modal após fechar o primeiro
   };
 
   const renderConteudoEtapa = () => {
@@ -76,7 +85,7 @@ const NovoCasoScreen = () => {
       case 1:
         return (
           <>
-            <Text style={tw`text-[16px] text-[#333] mb-0 ml-[30px] mt-[20px]`}>Informações Iniciais do Caso</Text>
+            <Text style={tw`text-[18px] text-[#333] mt-[20px] mb-0 font-bold  text-center`}>Informações Iniciais do Caso</Text>
             <FormContainer>
               <FormSection
                 fields={[
@@ -92,7 +101,7 @@ const NovoCasoScreen = () => {
       case 2:
         return (
           <>
-            <Text style={tw`text-[16px] text-[#333] mb-0 text-center mt-[20px]`}>Atribuições e Status</Text>
+            <Text style={tw`text-[18px] text-[#333] mt-[20px] mb-0 font-bold  text-center`}>Atribuições e Status</Text>
             <FormContainer>
               <FormSection
                 fields={[
@@ -118,45 +127,6 @@ const NovoCasoScreen = () => {
         );
 
       case 3:
-        return (
-          <>
-            <Text style={tw`text-[16px] text-[#333] mb-0 text-center mt-[20px]`}>Adicionar Evidências</Text>
-            <FormContainer>
-              <FormSection
-                fields={[
-                  {
-                    label: 'Resposta',
-                    placeholder: 'Selecione uma opção',
-                    name: 'hasEvidence',
-                    type: 'select' as const,
-                    options: [
-                      { label: 'Sim', value: 'yes' },
-                      { label: 'Não', value: 'no' },
-                    ],
-                  },
-                  ...(formData.hasEvidence === 'yes'
-                    ? [
-                        {
-                          label: 'Evidências',
-                          placeholder: 'Selecione evidências do caso',
-                          name: 'evidence',
-                          type: 'select' as const,
-                          options: [
-                            { label: 'Evidência 1', value: 'evidence1' },
-                            { label: 'Evidência 2', value: 'evidence2' },
-                            { label: 'Evidência 3', value: 'evidence3' },
-                          ],
-                        },
-                      ]
-                    : []),
-                ]}
-                onChange={handleInputChange}
-              />
-            </FormContainer>
-          </>
-        );
-
-      case 4:
         const caseData = {
           title: formData.title || 'Caso Exemplo',
           description: formData.description || 'Descrição detalhada do caso aqui.',
@@ -170,28 +140,56 @@ const NovoCasoScreen = () => {
         };
 
         return (
-          <ScrollView style={tw`flex-1`}>
-            <View>
-              <Text style={tw`text-[16px] text-[#333] mb-0 mt-[20px] text-center`}>Revisão Final</Text>
-              <View style={tw`mx-5 mt-5 p-3.75 bg-[#E0F7FA] rounded-[10px] border border-[#B2EBF2]`}>
-                <Text style={tw`text-[14px] text-[#333] font-bold mt-2.5`}>Título:</Text>
-                <Text style={tw`text-[14px] text-[#666] mb-2.5`}>{caseData.title}</Text>
-                <Text style={tw`text-[14px] text-[#333] font-bold mt-2.5`}>Descrição:</Text>
-                <Text style={tw`text-[14px] text-[#666] mb-2.5`}>{caseData.description}</Text>
-                <Text style={tw`text-[14px] text-[#333] font-bold mt-2.5`}>Status:</Text>
-                <Text style={tw`text-[14px] text-[#666] mb-2.5`}>{caseData.status}</Text>
-                <Text style={tw`text-[14px] text-[#333] font-bold mt-2.5`}>Responsável:</Text>
-                <Text style={tw`text-[14px] text-[#666] mb-2.5`}>{caseData.responsible}</Text>
-                <Text style={tw`text-[14px] text-[#333] font-bold mt-2.5`}>Cidade:</Text>
-                <Text style={tw`text-[14px] text-[#666] mb-2.5`}>{caseData.city}</Text>
-                <Text style={tw`text-[14px] text-[#333] font-bold mt-2.5`}>Estado:</Text>
-                <Text style={tw`text-[14px] text-[#666] mb-2.5`}>{caseData.state}</Text>
-                <Text style={tw`text-[14px] text-[#333] font-bold mt-2.5`}>Data de Criação:</Text>
-                <Text style={tw`text-[14px] text-[#666] mb-2.5`}>{caseData.creationDate}</Text>
-                <Text style={tw`text-[14px] text-[#333] font-bold mt-2.5`}>Caso Referência:</Text>
-                <Text style={tw`text-[14px] text-[#666] mb-2.5`}>{caseData.caseReference}</Text>
-                <Text style={tw`text-[14px] text-[#333] font-bold mt-2.5`}>Evidência Relacionada:</Text>
-                <Text style={tw`text-[14px] text-[#666] mb-2.5`}>{caseData.evidence}</Text>
+        <ScrollView style={tw`flex-1`}>
+            <View style={tw`mx-5 mt-5`}>
+              <Text style={tw`text-[18px] text-[#333] font-bold mb-4 text-center`}>Revisão Final do Caso</Text>
+              {/* Cartão: Informações do Caso */}
+              <View style={tw`bg-white rounded-[15px] p-5 mb-5 shadow-lg elevation-8 border border-gray-200`}>
+                <Text style={tw`text-[16px] text-[#333] font-bold mb-3 border-b border-gray-200 pb-2`}>Informações do Caso</Text>
+                <View style={tw`mb-3`}>
+                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Título:</Text>
+                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{caseData.title}</Text>
+                </View>
+                <View style={tw`mb-3`}>
+                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Descrição:</Text>
+                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{caseData.description}</Text>
+                </View>
+                <View style={tw`mb-3`}>
+                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Status:</Text>
+                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{caseData.status}</Text>
+                </View>
+                <View style={tw`mb-3`}>
+                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Responsável:</Text>
+                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{caseData.responsible}</Text>
+                </View>
+              </View>
+              {/* Cartão: Localização */}
+              <View style={tw`bg-white rounded-[15px] p-5 mb-5 shadow-lg elevation-8 border border-gray-200`}>
+                <Text style={tw`text-[16px] text-[#333] font-bold mb-3 border-b border-gray-200 pb-2`}>Localização</Text>
+                <View style={tw`mb-3`}>
+                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Cidade:</Text>
+                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{caseData.city}</Text>
+                </View>
+                <View style={tw`mb-3`}>
+                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Estado:</Text>
+                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{caseData.state}</Text>
+                </View>
+              </View>
+              {/* Cartão: Detalhes Adicionais */}
+              <View style={tw`bg-white rounded-[15px] p-5 mb-5 shadow-lg elevation-8 border border-gray-200`}>
+                <Text style={tw`text-[16px] text-[#333] font-bold mb-3 border-b border-gray-200 pb-2`}>Detalhes Adicionais</Text>
+                <View style={tw`mb-3`}>
+                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Data de Criação:</Text>
+                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{caseData.creationDate}</Text>
+                </View>
+                <View style={tw`mb-3`}>
+                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Caso Referência:</Text>
+                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{caseData.caseReference}</Text>
+                </View>
+                <View style={tw`mb-3`}>
+                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Evidência Relacionada:</Text>
+                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{caseData.evidence}</Text>
+                </View>
               </View>
               <TouchableOpacity
                 style={tw`bg-[#4A8481] rounded-[8px] py-3.75 items-center mx-10 mt-5 mb-5`}
@@ -209,6 +207,7 @@ const NovoCasoScreen = () => {
           </ScrollView>
         );
 
+      
       default:
         return null;
     }
@@ -219,14 +218,23 @@ const NovoCasoScreen = () => {
       <Header title="Novo Caso" />
       <StepIndicator activeStep={etapa} setEtapa={setEtapa} />
       {renderConteudoEtapa()}
-      {etapa < 4 && (
+      {etapa < 3 && (
         <TouchableOpacity
-          style={tw`bg-[#679AA3] rounded-[8px] py-3.75 items-center mx-10 mt-5`}
+          style={tw`bg-[#679AA3] rounded-[10px] py-3 mx-10 mt-5 shadow-lg elevation-5`} // Sombra e elevação
           onPress={handleNext}
+          activeOpacity={0.8}
         >
-          <Text style={tw`text-white text-[16px] font-bold`}>Próximo</Text>
+        <Text style={tw`text-white text-[16px] font-bold text-center`}>Próximo</Text>
         </TouchableOpacity>
       )}
+      <ConfirmSaveModal
+        visible={showConfirmModal}
+        onClose={handleCloseConfirmModal}
+      />
+      <AddEvidenceModal
+        visible={showEvidenceModal}
+        onClose={() => setShowEvidenceModal(false)}
+      />
     </SafeAreaView>
   );
 };
