@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text } from 'react-native';
 import tw from 'twrnc';
-import styles from '../../styles/Dashboard';
 import { DadosItem } from '@/Types/Dashboards';
 
 interface DataTableProps {
@@ -9,29 +8,22 @@ interface DataTableProps {
 }
 
 const DataTable: React.FC<DataTableProps> = ({ dadosAtuais }) => {
+  if (!dadosAtuais || dadosAtuais.length === 0) {
+    return (
+      <View style={tw`bg-white p-4 rounded-lg shadow mb-4`}>
+        <Text style={tw`text-lg font-bold`}>Nenhum dado para exibir</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.tableContainer}>
-      <Text style={styles.tableTitle}>Dados</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={styles.table}>
-          {dadosAtuais.length > 0 ? (
-            <>
-              <View style={styles.tableHeader}>
-                <Text style={[styles.tableHeaderCell, tw`w-40`]}>Categoria</Text>
-                <Text style={[styles.tableHeaderCell, tw`w-24`]}>Quantidade</Text>
-              </View>
-              {dadosAtuais.map((item, index) => (
-                <View key={index} style={styles.tableRow}>
-                  <Text style={[styles.tableCell, tw`w-40`]}>{item.categoria}</Text>
-                  <Text style={[styles.tableCell, tw`w-24`]}>{item.quantidade}</Text>
-                </View>
-              ))}
-            </>
-          ) : (
-            <Text style={styles.tableEmpty}>Nenhum dado disponível</Text>
-          )}
+    <View style={tw`bg-white p-4 rounded-lg shadow mb-4`}>
+      {dadosAtuais.map((item, index) => (
+        <View key={index} style={tw`flex-row justify-between py-2 border-b border-gray-200`}>
+          <Text style={tw`text-gray-700 w-1/2`}>{item.categoria}</Text>
+          <Text style={tw`text-gray-700 w-1/2 text-right`}>{item.quantidade}</Text>
         </View>
-      </ScrollView>
+      ))}
     </View>
   );
 };
