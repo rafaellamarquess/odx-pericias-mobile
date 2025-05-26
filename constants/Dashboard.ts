@@ -27,13 +27,13 @@ const navButtons: { label: string; icon: IconDefinition }[] = [
   backgroundGradientTo: '#fff',
   decimalPlaces: 0,
   color: (opacity = 1) => `rgba(33, 150, 243, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(55, 65, 81, ${opacity})`, // Cinza escuro
+  labelColor: (opacity = 1) => `rgba(55, 65, 81, ${opacity})`, 
   style: {
     borderRadius: 16,
   },
   propsForLabels: {
     fontSize: 14,
-    fontFamily: 'System', // ou outro nome como 'Roboto'
+    fontFamily: 'System', 
     fontWeight: '500',
   },
 };

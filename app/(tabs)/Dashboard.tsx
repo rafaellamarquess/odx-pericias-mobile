@@ -1,6 +1,5 @@
-// app/(tabs)/Dashboard.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { fetchDashboardData } from '@/lib/DashboardApi';
 import { DashboardData } from '@/Types/Dashboards';
 import TotalCasesCard from '@/components/Dashboard/TotalCasesCard';
@@ -9,6 +8,7 @@ import FilterButtons from '@/components/Dashboard/FilterButton';
 import ComparisonChart from '@/components/Dashboard/ComparisonChart';
 import DataTable from '@/components/Dashboard/DataTable';
 import NavigationBar from '@/components/Dashboard/NavigationBar';
+import Header from '@/components/Dashboard/Header';
 
 const DashboardScreen: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -16,6 +16,8 @@ const DashboardScreen: React.FC = () => {
   const [mesFiltro, setMesFiltro] = useState('2025-05');
   const [dataFiltro, setDataFiltro] = useState('');
   const [filtroSelecionado, setFiltroSelecionado] = useState<'vitima' | 'sexo' | 'estado' | 'lesoes' | 'cidade'>('vitima');
+
+  const chartWidth = Dimensions.get('window').width - 32; 
 
   const loadData = async () => {
     setLoading(true);
@@ -36,8 +38,8 @@ const DashboardScreen: React.FC = () => {
     loadData();
   }, [mesFiltro, dataFiltro]);
 
-  if (loading) return <Text>Carregando...</Text>;
-  if (!dashboardData) return <Text>Erro ao carregar dados.</Text>;
+  if (loading) return <Text style={styles.loading}>Carregando...</Text>;
+  if (!dashboardData) return <Text style={styles.error}>Erro ao carregar dados.</Text>;
 
   const getChartData = () => {
     const data = dashboardData[filtroSelecionado] || [];
@@ -46,34 +48,59 @@ const DashboardScreen: React.FC = () => {
       datasets: [
         {
           data: data.map((item) => item.quantidade),
-          ...(filtroSelecionado === 'cidade' ? { pieData: data.map((item) => ({ value: item.quantidade, name: item.categoria })) } : {}),
+          ...(filtroSelecionado === 'cidade'
+            ? { pieData: data.map((item) => ({ value: item.quantidade, name: item.categoria })) }
+            : {}),
         },
       ],
     };
   };
 
   const chartData = getChartData();
-  const chartWidth = 300;
 
   return (
     <View style={styles.container}>
+      <Header />
       <NavigationBar />
-      <TotalCasesCard totalCasos={dashboardData.totalCasos} />
-      <PeriodFilters
-        mesFiltro={mesFiltro}
-        setMesFiltro={setMesFiltro}
-        dataFiltro={dataFiltro}
-        setDataFiltro={setDataFiltro}
-      />
-      <FilterButtons filtroSelecionado={filtroSelecionado} setFiltroSelecionado={setFiltroSelecionado} />
-      <ComparisonChart chartData={chartData} chartWidth={chartWidth} tipoGrafico={dashboardData[filtroSelecionado]?.[0]?.tipoGrafico || 'barra'} />
-      <DataTable dadosAtuais={dashboardData[filtroSelecionado] || []} />
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <TotalCasesCard totalCasos={dashboardData.totalCasos} />
+        <PeriodFilters
+          mesFiltro={mesFiltro}
+          setMesFiltro={setMesFiltro}
+          dataFiltro={dataFiltro}
+          setDataFiltro={setDataFiltro}
+        />
+        <FilterButtons filtroSelecionado={filtroSelecionado} setFiltroSelecionado={setFiltroSelecionado} />
+        <ComparisonChart
+          chartData={chartData}
+          chartWidth={chartWidth}
+          tipoGrafico={dashboardData[filtroSelecionado]?.[0]?.tipoGrafico || 'barra'}
+        />
+        <DataTable dadosAtuais={dashboardData[filtroSelecionado] || []} />
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 16, flex: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: '#f3f4f6',
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  loading: {
+    textAlign: 'center',
+    color: '#374151',
+    marginTop: 20,
+  },
+  error: {
+    textAlign: 'center',
+    color: '#dc2626', // Vermelho para erro
+    marginTop: 20,
+  },
 });
 
 export default DashboardScreen;
