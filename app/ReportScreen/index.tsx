@@ -1,493 +1,410 @@
-import React, { useState, useEffect } from "react";
-import { Audio } from "expo-av";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   TextInput,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
   Modal,
+  ScrollView,
   Alert,
+  Platform,
+  Image,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import { useRouter } from "expo-router";
+import { Feather, Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import tw from "twrnc";
-import { Ionicons as Icon } from "@expo/vector-icons";
 
-type Caso = {
-  id: string;
+type CasoPopulado = {
+  _id: string;
   titulo: string;
-  evidencias: {
-    observacoesTexto: string;
-    observacaoId: string;
-  };
+  descricao: string;
 };
 
-export default function ElaborarRelatorio() {
-  const [etapa, setEtapa] = useState(1);
-  const [formData, setFormData] = useState({
-    titulo: "",
-    descricao: "",
-    objetoPericia: "",
-    analiseTecnica: "",
-    metodoUtilizado: "",
-    destinatario: "",
-    materiaisUtilizados: "",
-    examesRealizados: "",
-    consideracoesTecnicoPericiais: "",
-    conclusaoTecnica: "",
-    observacoesTexto: "",
-    observacaoId: "",
-  });
+type EvidencePopulado = {
+  _id: string;
+  categoria: string;
+  tipo: string;
+  conteudo?: string;
+  imagemURL?: string;
+};
 
-  const [gravandoAudio, setGravandoAudio] = useState(false);
-  const [gravacao, setGravacao] = useState<Audio.Recording | null>(null);
-  const [audioUri, setAudioUri] = useState<string | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
+type Report = {
+  _id: string;
+  titulo: string;
+  descricao: string;
+  objetoPericia: string;
+  analiseTecnica: string;
+  metodoUtilizado: string;
+  destinatario: string;
+  materiaisUtilizados: string;
+  examesRealizados: string;
+  consideracoesTecnicoPericiais: string;
+  conclusaoTecnica: string;
+  caso: CasoPopulado;
+  evidencias: EvidencePopulado[];
+  criadoEm: string; // ISO date
+  assinadoDigitalmente: boolean;
+};
 
-  // Novos estados para casos
-  const [casosDisponiveis, setCasosDisponiveis] = useState<Caso[]>([]);
-  const [casoSelecionado, setCasoSelecionado] = useState<string | null>(null);
+export default function GestaoRelatorios() {
+  const router = useRouter();
 
-  const tituloEtapa: Record<number, string> = {
-    1: "Informações Básicas",
-    2: "Dados Periciais",
-    3: "Análise Técnica",
-    4: "Revisão dos dados",
-    5: "Finalização",
-  };
+  // lista principal
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const nomesCampos: Record<string, string> = {
-    titulo: "Título",
-    descricao: "Descrição",
-    objetoPericia: "Objeto da Perícia",
-    analiseTecnica: "Análise Técnica",
-    metodoUtilizado: "Método Utilizado",
-    destinatario: "Destinatário",
-    materiaisUtilizados: "Materiais Utilizados",
-    examesRealizados: "Exames Realizados",
-    consideracoesTecnicoPericiais: "Considerações Técnico-Periciais",
-    conclusaoTecnica: "Conclusão Técnica",
-    observacoesTexto: "Observações (Texto)",
-    observacaoId: "Observação (Áudio URI)",
-  };
+  // busca + filtros
+  const [search, setSearch] = useState("");
+  const [filterCaso, setFilterCaso] = useState("");
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
+  const [showFilter, setShowFilter] = useState(false);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [sortBy, setSortBy] = useState<
+    "alphaAsc" | "alphaDesc" | "dateNew" | "dateOld"
+  >("dateNew");
 
-  const handleChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: value });
-  };
+  // edição
+  const [editing, setEditing] = useState<Report | null>(null);
+  const [editData, setEditData] = useState<Partial<Report>>({});
 
-  // Gravação de áudio
-  const iniciarGravacao = async () => {
+  // Buscar da API
+  const fetchReports = useCallback(async () => {
+    setLoading(true);
     try {
-      const { granted } = await Audio.requestPermissionsAsync();
-      if (!granted) {
-        Alert.alert("Permissão de microfone negada.");
-        return;
-      }
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
+      const qs = new URLSearchParams({
+        titulo: search,
+        caso: filterCaso,
+        dataInicio: startDate?.toISOString() || "",
+        dataFim: endDate?.toISOString() || "",
+        page: "1",
+        limit: "100",
       });
-      const novaGravacao = new Audio.Recording();
-      await novaGravacao.prepareToRecordAsync({
-        android: {
-          extension: ".m4a",
-          outputFormat: 2,
-          audioEncoder: 3,
-          sampleRate: 44100,
-          numberOfChannels: 2,
-          bitRate: 128000,
-        },
-        ios: {
-          extension: ".caf",
-          audioQuality: 2,
-          sampleRate: 44100,
-          numberOfChannels: 2,
-          bitRate: 128000,
-          linearPCMBitDepth: 16,
-          linearPCMIsBigEndian: false,
-          linearPCMIsFloat: false,
-        },
-        web: {
-          mimeType: "audio/webm",
-          bitsPerSecond: 128000,
-        },
-      });
-      await novaGravacao.startAsync();
-      setGravacao(novaGravacao);
-      setGravandoAudio(true);
-    } catch (error) {
-      console.error("Erro ao iniciar gravação:", error);
-    }
-  };
-
-  const pararGravacao = async () => {
-    try {
-      if (!gravacao) return;
-      await gravacao.stopAndUnloadAsync();
-      const uri = gravacao.getURI();
-      setAudioUri(uri);
-      setFormData((prev) => ({ ...prev, observacaoId: uri || "" }));
-      setGravandoAudio(false);
-      setGravacao(null);
-    } catch (error) {
-      console.error("Erro ao parar gravação:", error);
-    }
-  };
-
-  const reproduzirAudio = async () => {
-    if (!audioUri) return;
-    const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
-    await sound.playAsync();
-  };
-
-  // Busca os casos da API ao montar o componente
-  useEffect(() => {
-    async function carregarCasos() {
-      try {
-        const res = await fetch("https://sua-api.com/casos"); // <— Aponte aqui para seu endpoint
-        const data: Caso[] = await res.json();
-        setCasosDisponiveis(data);
-      } catch (error) {
-        console.error("Erro ao carregar casos:", error);
-      }
-    }
-    carregarCasos();
-  }, []);
-
-  // Carrega evidências do caso selecionado
-  const carregarEvidenciasDoCaso = (casoId: string) => {
-    const caso = casosDisponiveis.find((c) => c.id === casoId);
-    if (!caso) return;
-    setFormData((prev) => ({
-      ...prev,
-      titulo: caso.titulo,
-      observacoesTexto: caso.evidencias.observacoesTexto,
-      observacaoId: caso.evidencias.observacaoId,
-    }));
-    setAudioUri(caso.evidencias.observacaoId);
-  };
-
-  // Novo dropdown usando Picker
-  const renderDropdownCasos = () => (
-    <View style={tw`mb-4`}>
-      <Text style={tw`text-zinc-700 font-semibold mb-2`}>
-        Selecionar um Caso
-      </Text>
-      <View style={tw`bg-white border border-zinc-300 rounded-lg`}>
-        <Picker
-          selectedValue={casoSelecionado}
-          onValueChange={(value) => {
-            setCasoSelecionado(value);
-            if (value) carregarEvidenciasDoCaso(value);
-          }}
-        >
-          <Picker.Item label="-- Selecione --" value={null} />
-          {casosDisponiveis.map((c) => (
-            <Picker.Item key={c.id} label={c.titulo} value={c.id} />
-          ))}
-        </Picker>
-      </View>
-    </View>
-  );
-
-  // Resto das renderizações originais (inputs, observações, bolinhas, etapas etc.)
-  const renderObservacoes = () => (
-    <View style={tw`mb-4`}>
-      <Text style={tw`text-zinc-700 font-semibold mb-2`}>Observações</Text>
-      <TextInput
-        style={tw`bg-white border border-zinc-300 rounded-lg px-4 py-3 text-zinc-800 h-24 mb-3`}
-        placeholder="Digite uma observação..."
-        placeholderTextColor="#9CA3AF"
-        value={formData.observacoesTexto}
-        onChangeText={(t) => handleChange("observacoesTexto", t)}
-        multiline
-        textAlignVertical="top"
-      />
-      <TouchableOpacity
-        onPress={gravandoAudio ? pararGravacao : iniciarGravacao}
-        style={tw`flex-row items-center justify-center bg-[#679AA3] px-4 py-3 rounded-lg`}
-      >
-        <Icon
-          name={gravandoAudio ? "stop-circle-outline" : "mic-outline"}
-          size={20}
-          color="#fff"
-          style={tw`mr-2`}
-        />
-        <Text style={tw`text-white font-semibold`}>
-          {gravandoAudio ? "Parar Gravação" : "Gravar Observação em Áudio"}
-        </Text>
-      </TouchableOpacity>
-      {audioUri && (
-        <TouchableOpacity
-          onPress={reproduzirAudio}
-          style={tw`flex-row items-center justify-center bg-green-600 px-4 py-2 rounded-lg mt-3`}
-        >
-          <Icon name="play-outline" size={20} color="#fff" style={tw`mr-2`} />
-          <Text style={tw`text-white font-semibold`}>Reproduzir Áudio</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-
-  const renderInput = (
-    label: string,
-    placeholder: string,
-    field: keyof typeof formData,
-    multiline = false
-  ) => (
-    <View style={tw`mb-4`}>
-      <Text style={tw`text-zinc-700 font-semibold mb-2`}>{label}</Text>
-      <TextInput
-        style={tw`bg-white border border-zinc-300 rounded-lg px-4 py-3 text-zinc-800 ${
-          multiline ? "h-24" : ""
-        }`}
-        placeholder={placeholder}
-        placeholderTextColor="#9CA3AF"
-        value={formData[field]}
-        onChangeText={(text) => handleChange(field, text)}
-        multiline={multiline}
-        textAlignVertical={multiline ? "top" : "auto"}
-      />
-    </View>
-  );
-
-  const renderBolinhas = () => {
-    if (etapa === 5) return null;
-    const totalEtapas = 4;
-    return (
-      <View style={tw`flex-row justify-center my-6`}>
-        {Array.from({ length: totalEtapas }, (_, i) => {
-          const index = i + 1;
-          const ativa = index === etapa;
+      const res = await fetch(`https://sua-api.com/reports?${qs}`);
+      const json = await res.json();
+      let lista: Report[] = json.relatorios;
+      // ordenação cliente
+      lista = lista.sort((a, b) => {
+        if (sortBy === "alphaAsc")
+          return a.caso.titulo.localeCompare(b.caso.titulo);
+        if (sortBy === "alphaDesc")
+          return b.caso.titulo.localeCompare(a.caso.titulo);
+        if (sortBy === "dateNew")
           return (
-            <View
-              key={`bolinha-${index}`}
-              style={tw.style(
-                "w-8 h-8 rounded-full border flex items-center justify-center mx-1",
-                ativa
-                  ? "bg-[#679AA3] border-[#679AA3]"
-                  : "bg-transparent border-zinc-400"
-              )}
-            >
-              <Text
-                style={tw.style(
-                  "font-semibold",
-                  ativa ? "text-white" : "text-zinc-400"
-                )}
-              >
-                {index}
-              </Text>
-            </View>
+            new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime()
           );
-        })}
+        return new Date(a.criadoEm).getTime() - new Date(b.criadoEm).getTime();
+      });
+      setReports(lista);
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Erro", "Não foi possível carregar relatórios.");
+    } finally {
+      setLoading(false);
+    }
+  }, [search, filterCaso, startDate, endDate, sortBy]);
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
+  useEffect(() => {
+    fetchReports();
+  }, [search]);
+
+  const onEdit = (r: Report) => {
+    setEditing(r);
+    setEditData({
+      titulo: r.titulo,
+      descricao: r.descricao,
+      objetoPericia: r.objetoPericia,
+      analiseTecnica: r.analiseTecnica,
+      metodoUtilizado: r.metodoUtilizado,
+      destinatario: r.destinatario,
+      materiaisUtilizados: r.materiaisUtilizados,
+      examesRealizados: r.examesRealizados,
+      consideracoesTecnicoPericiais: r.consideracoesTecnicoPericiais,
+      conclusaoTecnica: r.conclusaoTecnica,
+    });
+  };
+
+  const saveEdit = async () => {
+    if (!editing) return;
+    try {
+      const res = await fetch(`https://sua-api.com/reports/${editing._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editData),
+      });
+      if (!res.ok) throw new Error();
+      Alert.alert("Sucesso", "Relatório atualizado.");
+      setEditing(null);
+      fetchReports();
+    } catch {
+      Alert.alert("Erro", "Não foi possível atualizar.");
+    }
+  };
+
+  const deleteReport = (id: string) => {
+    Alert.alert("Confirmação", "Excluir este relatório?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Excluir",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const res = await fetch(`https://sua-api.com/reports/${id}`, {
+              method: "DELETE",
+            });
+            if (!res.ok) throw new Error();
+            Alert.alert("Excluído", "Relatório removido.");
+            fetchReports();
+          } catch {
+            Alert.alert("Erro", "Não foi possível excluir.");
+          }
+        },
+      },
+    ]);
+  };
+
+  if (loading)
+    return (
+      <View style={tw`flex-1 justify-center items-center`}>
+        <ActivityIndicator size="large" color="#1C7B7B" />
       </View>
     );
-  };
-
-  const renderConteudoEtapa = () => (
-    <View style={tw`bg-white rounded-xl p-4 shadow-md`}>
-      {etapa === 1 && (
-        <>
-          {renderDropdownCasos()}
-          {renderInput("Título", "Informe o título do relatório", "titulo")}
-          {renderInput("Descrição", "Descreva o relatório", "descricao", true)}
-        </>
-      )}
-      {etapa === 2 && (
-        <>
-          {renderInput(
-            "Objeto da Perícia",
-            "Descreva o objeto",
-            "objetoPericia",
-            true
-          )}
-          {renderInput(
-            "Análise Técnica",
-            "Descreva a análise",
-            "analiseTecnica",
-            true
-          )}
-          {renderInput(
-            "Método Utilizado",
-            "Informe o método",
-            "metodoUtilizado"
-          )}
-          {renderInput(
-            "Destinatário",
-            "Informe o destinatário",
-            "destinatario"
-          )}
-        </>
-      )}
-      {etapa === 3 && (
-        <>
-          {renderInput(
-            "Materiais Utilizados",
-            "Descreva os materiais",
-            "materiaisUtilizados",
-            true
-          )}
-          {renderInput(
-            "Exames Realizados",
-            "Informe os exames",
-            "examesRealizados",
-            true
-          )}
-          {renderInput(
-            "Considerações Técnico-Periciais",
-            "Escreva as considerações",
-            "consideracoesTecnicoPericiais",
-            true
-          )}
-          {renderInput(
-            "Conclusão Técnica",
-            "Informe a conclusão",
-            "conclusaoTecnica",
-            true
-          )}
-          {renderObservacoes()}
-        </>
-      )}
-      {etapa === 4 && (
-        <View>
-          <Text style={tw`text-zinc-700 mb-2`}>
-            Revise os dados antes de finalizar:
-          </Text>
-          {Object.entries(formData).map(([key, value]) => (
-            <View key={key} style={tw`mb-2`}>
-              <Text style={tw`text-zinc-500 text-sm`}>{nomesCampos[key]}</Text>
-              <Text style={tw`text-zinc-800 font-semibold`}>
-                {value || "Não preenchido"}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
-    </View>
-  );
 
   return (
-    <View style={tw`flex-1`}>
+    <View style={tw`flex-1 bg-gray-50`}>
       {/* Header */}
       <View
-        style={tw`bg-[#679AA3] rounded-b-lg px-6 py-9 flex-row items-center justify-between`}
+        style={tw`flex-row items-center px-4 py-3 bg-[#679AA3] rounded-bottom-5`}
       >
-        <Text style={tw`text-white font-bold text-xl`}>
-          Elaborar um Relatório
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="chevron-back-circle-outline" size={32} color="#000" />
+        </TouchableOpacity>
+        <Text style={tw`text-xl font-bold ml-2 text-white`}>
+          Gestão de Relatórios
         </Text>
-        <Icon name="document-text-outline" size={28} color="#fff" />
+        <Image
+          source={require("../../assets/images/Logo-odx.png")}
+          style={tw`w-15 h-20 ml-auto`}
+          resizeMode="contain"
+        />
       </View>
 
-      {/* Conteúdo principal */}
-      <KeyboardAvoidingView
-        style={tw`flex-1 bg-zinc-100`}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={100}
-      >
-        <ScrollView contentContainerStyle={tw`p-6 pb-20`}>
-          {/* Navegação etapas */}
-          <View style={tw`flex-row items-center justify-between mb-2`}>
-            {etapa < 5 ? (
-              <TouchableOpacity
-                onPress={() => etapa > 1 && setEtapa(etapa - 1)}
-              >
-                <Icon
-                  name="chevron-back-circle-outline"
-                  size={36}
-                  color="#6b7280"
-                />
-              </TouchableOpacity>
-            ) : (
-              <View />
-            )}
-            {etapa === 5 && (
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(false);
-                  setEtapa(1);
-                  setFormData({
-                    titulo: "",
-                    descricao: "",
-                    objetoPericia: "",
-                    analiseTecnica: "",
-                    metodoUtilizado: "",
-                    destinatario: "",
-                    materiaisUtilizados: "",
-                    examesRealizados: "",
-                    consideracoesTecnicoPericiais: "",
-                    conclusaoTecnica: "",
-                    observacoesTexto: "",
-                    observacaoId: "",
-                  });
-                  setAudioUri(null);
-                }}
-              >
-                <Icon name="home-outline" size={32} color="#6b7280" />
-              </TouchableOpacity>
-            )}
-          </View>
+      {/* Busca + Filtro */}
+      <View style={tw`px-4`}>
+        <View style={tw`flex-row items-center bg-gray-100 rounded-lg mt-5`}>
+          <TextInput
+            style={tw`flex-1 px-4 py-2`}
+            placeholder="Buscar por Caso"
+            value={search}
+            onChangeText={setSearch}
+          />
+          <Feather name="search" size={20} style={tw`mr-3`} />
+        </View>
+        <TouchableOpacity
+          style={tw`mt-2 self-start bg-teal-600 px-3 py-2 rounded-lg`}
+          onPress={() => setShowFilter(true)}
+        >
+          <Text style={tw`text-white`}>Filtrar</Text>
+        </TouchableOpacity>
+      </View>
 
-          {/* Indicador de etapas */}
-          {renderBolinhas()}
-
-          {/* Título da etapa */}
-          {etapa < 5 && (
-            <Text style={tw`text-xl font-bold text-zinc-800 mb-6`}>
-              {tituloEtapa[etapa]}
+      {/* Lista */}
+      <FlatList
+        data={reports}
+        keyExtractor={(r) => r._id}
+        contentContainerStyle={tw`p-4`}
+        renderItem={({ item }) => (
+          <View style={tw`bg-white rounded-xl p-4 mb-3 shadow`}>
+            <Text style={tw`font-semibold`}>Caso: {item.caso.titulo}</Text>
+            <Text numberOfLines={2} style={tw`text-sm text-gray-600`}>
+              {item.titulo} — {item.descricao}
             </Text>
-          )}
-
-          {/* Conteúdo da etapa */}
-          {etapa === 5 ? (
-            <View style={tw`items-center justify-center mt-20`}>
-              <Text style={tw`text-2xl text-zinc-800 text-center mb-4`}>
-                Você finalizou a elaboração do relatório com sucesso!
-              </Text>
-              <TouchableOpacity
-                style={tw`bg-[#679AA3] px-6 py-3 rounded-lg mb-3`}
-                onPress={() => setModalVisible(true)}
-              >
-                <Text style={tw`text-white font-semibold`}>Gerar PDF</Text>
+            <Text style={tw`text-xs text-gray-400 mt-1`}>
+              Criado em: {new Date(item.criadoEm).toLocaleDateString()}
+            </Text>
+            <View style={tw`flex-row justify-end mt-2`}>
+              <TouchableOpacity onPress={() => onEdit(item)} style={tw`mr-4`}>
+                <Feather name="edit-2" size={20} color="#1C7B7B" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => deleteReport(item._id)}>
+                <Feather name="trash-2" size={20} color="#e53e3e" />
               </TouchableOpacity>
             </View>
-          ) : (
-            renderConteudoEtapa()
-          )}
+          </View>
+        )}
+      />
 
-          {/* Botões Próximo/Finalizar */}
-          {etapa < 5 && (
-            <View style={tw`flex-row justify-between mt-10`}>
-              <View style={tw`w-24`} />
+      {/* Modal de filtros */}
+      <Modal visible={showFilter} transparent animationType="slide">
+        <View style={tw`flex-1 justify-end bg-black/30`}>
+          <View style={tw`bg-white p-4 rounded-t-xl`}>
+            <Text style={tw`text-lg font-semibold mb-2`}>Filtros</Text>
+            <Text style={tw`font-medium`}>Caso exato:</Text>
+            <TextInput
+              style={tw`border border-gray-300 rounded-lg px-3 py-2 mb-3`}
+              placeholder="ID ou título do caso"
+              value={filterCaso}
+              onChangeText={setFilterCaso}
+            />
+            <Text style={tw`font-medium mb-1`}>Período:</Text>
+            <View style={tw`flex-row mb-3`}>
               <TouchableOpacity
-                onPress={() => setEtapa(etapa + 1)}
-                style={tw`bg-[#679AA3] rounded-lg px-6 py-3`}
+                style={tw`flex-1 border border-gray-300 rounded-lg px-3 py-2 mr-2`}
+                onPress={() => setShowStartPicker(true)}
               >
-                <Text style={tw`text-white font-semibold`}>
-                  {etapa < 4 ? "Próximo" : "Finalizar"}
+                <Text>
+                  {startDate ? startDate.toLocaleDateString() : "Data início"}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={tw`flex-1 border border-gray-300 rounded-lg px-3 py-2 ml-2`}
+                onPress={() => setShowEndPicker(true)}
+              >
+                <Text>
+                  {endDate ? endDate.toLocaleDateString() : "Data fim"}
                 </Text>
               </TouchableOpacity>
             </View>
-          )}
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      {/* Modal de visualização de PDF */}
-      <Modal visible={modalVisible} animationType="slide">
-        <View style={tw`flex-1`}>
-          <View
-            style={tw`bg-[#679AA3] px-4 py-3 flex-row items-center justify-between`}
-          >
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Icon name="close-circle-outline" size={32} color="#fff" />
-            </TouchableOpacity>
-            <Text style={tw`text-white font-semibold text-lg`}>
-              Visualizar PDF
-            </Text>
-            <View style={{ width: 32 }} />
+            {showStartPicker && (
+              <DateTimePicker
+                mode="date"
+                value={startDate || new Date()}
+                onChange={(_: any, d?: Date) => {
+                  setShowStartPicker(Platform.OS === "ios");
+                  if (d) setStartDate(d);
+                }}
+              />
+            )}
+            {showEndPicker && (
+              <DateTimePicker
+                mode="date"
+                value={endDate || new Date()}
+                onChange={(_: any, d?: Date) => {
+                  setShowEndPicker(Platform.OS === "ios");
+                  if (d) setEndDate(d);
+                }}
+              />
+            )}
+            <Text style={tw`font-medium mb-1`}>Ordenação:</Text>
+            {[
+              { label: "A → Z", value: "alphaAsc" },
+              { label: "Z → A", value: "alphaDesc" },
+              { label: "Mais recentes", value: "dateNew" },
+              { label: "Mais antigos", value: "dateOld" },
+            ].map((opt) => (
+              <TouchableOpacity
+                key={opt.value}
+                style={tw`flex-row items-center py-1`}
+                onPress={() => setSortBy(opt.value as any)}
+              >
+                <Ionicons
+                  name={
+                    sortBy === opt.value
+                      ? "radio-button-on"
+                      : "radio-button-off"
+                  }
+                  size={20}
+                  style={tw`mr-2`}
+                />
+                <Text>{opt.label}</Text>
+              </TouchableOpacity>
+            ))}
+            <View style={tw`flex-row justify-end mt-4`}>
+              <TouchableOpacity
+                onPress={() => {
+                  setFilterCaso("");
+                  setStartDate(undefined);
+                  setEndDate(undefined);
+                  setSortBy("dateNew");
+                }}
+                style={tw`mr-4`}
+              >
+                <Text>Limpar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowFilter(false)}>
+                <Text style={tw`font-semibold`}>Fechar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <Text style={tw`text-center mt-6`}>Carregando PDF...</Text>
+        </View>
+      </Modal>
+
+      {/* Modal de edição */}
+      <Modal visible={!!editing} animationType="slide">
+        <View style={tw`flex-1 bg-gray-50`}>
+          <View style={tw`flex-row items-center p-4`}>
+            <TouchableOpacity onPress={() => setEditing(null)}>
+              <Ionicons name="close-circle-outline" size={32} color="#1C7B7B" />
+            </TouchableOpacity>
+            <Text style={tw`text-xl font-semibold ml-2`}>Editar Relatório</Text>
+          </View>
+          <ScrollView contentContainerStyle={tw`p-4`}>
+            {[
+              { key: "titulo", label: "Título" },
+              { key: "descricao", label: "Descrição", multiline: true },
+              {
+                key: "objetoPericia",
+                label: "Objeto da Perícia",
+                multiline: true,
+              },
+              {
+                key: "analiseTecnica",
+                label: "Análise Técnica",
+                multiline: true,
+              },
+              { key: "metodoUtilizado", label: "Método Utilizado" },
+              { key: "destinatario", label: "Destinatário" },
+              {
+                key: "materiaisUtilizados",
+                label: "Materiais Utilizados",
+                multiline: true,
+              },
+              {
+                key: "examesRealizados",
+                label: "Exames Realizados",
+                multiline: true,
+              },
+              {
+                key: "consideracoesTecnicoPericiais",
+                label: "Considerações Técnico-Periciais",
+                multiline: true,
+              },
+              {
+                key: "conclusaoTecnica",
+                label: "Conclusão Técnica",
+                multiline: true,
+              },
+            ].map((field) => (
+              <View key={field.key} style={tw`mb-4`}>
+                <Text style={tw`font-medium mb-1`}>{field.label}</Text>
+                <TextInput
+                  style={tw`border border-gray-300 rounded-lg px-3 py-2 ${
+                    field.multiline ? "h-20" : ""
+                  }`}
+                  multiline={!!field.multiline}
+                  value={(editData as any)[field.key] as string}
+                  onChangeText={(t) =>
+                    setEditData((d) => ({ ...d, [field.key]: t }))
+                  }
+                />
+              </View>
+            ))}
+            <TouchableOpacity
+              style={tw`bg-teal-600 py-3 rounded-lg mt-2`}
+              onPress={saveEdit}
+            >
+              <Text style={tw`text-white text-center font-semibold`}>
+                Salvar
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
         </View>
       </Modal>
     </View>
