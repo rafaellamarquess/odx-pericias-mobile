@@ -1,3 +1,4 @@
+// src/components/Dashboard/DashboardScreen.tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { fetchDashboardData } from '@/lib/DashboardApi';
@@ -9,6 +10,7 @@ import ComparisonChart from '@/components/Dashboard/ComparisonChart';
 import DataTable from '@/components/Dashboard/DataTable';
 import NavigationBar from '@/components/Dashboard/NavigationBar';
 import Header from '@/components/Dashboard/Header';
+import MonthlyCasesChart from '@/components/Dashboard/CasesPerMonth';
 
 const DashboardScreen: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -17,7 +19,7 @@ const DashboardScreen: React.FC = () => {
   const [dataFiltro, setDataFiltro] = useState('');
   const [filtroSelecionado, setFiltroSelecionado] = useState<'vitima' | 'sexo' | 'estado' | 'lesoes' | 'cidade'>('vitima');
 
-  const chartWidth = Dimensions.get('window').width - 32; 
+  const chartWidth = Dimensions.get('window').width - 32;
 
   const loadData = async () => {
     setLoading(true);
@@ -26,6 +28,7 @@ const DashboardScreen: React.FC = () => {
       if (mesFiltro) filters.mes = mesFiltro;
       if (dataFiltro) filters.data = dataFiltro;
       const data = await fetchDashboardData(filters);
+      console.log("Dados carregados no DashboardScreen:", data);
       setDashboardData(data);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -48,7 +51,7 @@ const DashboardScreen: React.FC = () => {
       datasets: [
         {
           data: data.map((item) => item.quantidade),
-          ...(filtroSelecionado === 'cidade'
+          ...(['vitima', 'sexo'].includes(filtroSelecionado) // Removido 'cidade' da lista de pizza
             ? { pieData: data.map((item) => ({ value: item.quantidade, name: item.categoria })) }
             : {}),
         },
@@ -64,6 +67,7 @@ const DashboardScreen: React.FC = () => {
       <NavigationBar />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <TotalCasesCard totalCasos={dashboardData.totalCasos} />
+        <MonthlyCasesChart data={dashboardData.casosPorMes} width={chartWidth} />
         <PeriodFilters
           mesFiltro={mesFiltro}
           setMesFiltro={setMesFiltro}
@@ -74,7 +78,9 @@ const DashboardScreen: React.FC = () => {
         <ComparisonChart
           chartData={chartData}
           chartWidth={chartWidth}
-          tipoGrafico={dashboardData[filtroSelecionado]?.[0]?.tipoGrafico || 'barra'}
+          tipoGrafico={
+            ['vitima', 'sexo'].includes(filtroSelecionado) ? 'pizza' : 'barra' // 'cidade' agora usa 'barra'
+          }
         />
         <DataTable dadosAtuais={dashboardData[filtroSelecionado] || []} />
       </ScrollView>
@@ -98,7 +104,7 @@ const styles = StyleSheet.create({
   },
   error: {
     textAlign: 'center',
-    color: '#dc2626', // Vermelho para erro
+    color: '#dc2626',
     marginTop: 20,
   },
 });
