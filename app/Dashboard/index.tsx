@@ -1,10 +1,11 @@
+import HomeScreen from '@/components/Dashboard/Home';
 import React from 'react';
 import { View, Text } from 'react-native';
 
 const DetalhesCasoScreen: React.FC = () => {
   return (
     <View>
-      <Text>Detalhes do Caso</Text>
+      <HomeScreen></HomeScreen>
     </View>
   );
 };

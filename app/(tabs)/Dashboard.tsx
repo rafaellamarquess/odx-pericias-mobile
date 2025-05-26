@@ -1,4 +1,3 @@
-// src/components/Dashboard/DashboardScreen.tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { fetchDashboardData } from '@/lib/DashboardApi';
@@ -51,7 +50,7 @@ const DashboardScreen: React.FC = () => {
       datasets: [
         {
           data: data.map((item) => item.quantidade),
-          ...(['vitima', 'sexo'].includes(filtroSelecionado) // Removido 'cidade' da lista de pizza
+          ...(['vitima', 'sexo'].includes(filtroSelecionado) 
             ? { pieData: data.map((item) => ({ value: item.quantidade, name: item.categoria })) }
             : {}),
         },
@@ -79,7 +78,7 @@ const DashboardScreen: React.FC = () => {
           chartData={chartData}
           chartWidth={chartWidth}
           tipoGrafico={
-            ['vitima', 'sexo'].includes(filtroSelecionado) ? 'pizza' : 'barra' // 'cidade' agora usa 'barra'
+            ['vitima', 'sexo'].includes(filtroSelecionado) ? 'pizza' : 'barra'
           }
         />
         <DataTable dadosAtuais={dashboardData[filtroSelecionado] || []} />
