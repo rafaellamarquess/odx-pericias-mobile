@@ -299,7 +299,7 @@ export default function ElaborarRelatorio() {
     <View style={tw`flex-1`}>
       {/* HEADER */}
       <View
-        style={tw`flex-row items-center px-4 py-3 bg-[#679AA3] rounded-bottom-5`}
+        style={tw`flex-row items-center px-4 py-3 bg-[#679AA3] rounded-b-7`}
       >
         <TouchableOpacity
           onPress={() => {
