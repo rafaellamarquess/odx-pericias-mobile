@@ -1,6 +1,8 @@
 //import api from "";
 //import {isAxiosError} from "axios";
 //import {Evidence} from ""
+//import {Vitima} from ""
+//import {Laudo} from ""
 
 import { useRouter } from "expo-router";
 import React, { useState, useEffect, FormEvent } from "react";
@@ -56,6 +58,8 @@ export default function ElaborarRelatorio() {
   const [gravador, setGravador] = useState<Audio.Recording | null>(null);
 
   // const [evidencias, setEvidencias] = useState<Evidence[]>([]);
+  // const [vitima, setVitima] = useState<Vitima[]>([]);
+  // const [laudo, setLaudo] = useState<Laudo[]>([]);
 
   const iniciarGravacao = async () => {
     try {
@@ -162,6 +166,42 @@ export default function ElaborarRelatorio() {
       }
     }
     buscarEvidencias();
+  }, [casoReferencia]);
+
+  // Buscar vitima quando um caso é selecionado
+  useEffect(() => {
+    async function buscarVitima() {
+      if (!casoReferencia) {
+        //      setVitima([]);
+        return;
+      }
+      try {
+        //      const response = await api.get(`/api/cases/${casoReferencia}/vitima`);
+        //      setEvidencias(response.data.vitima);
+      } catch (error) {
+        setError("Erro ao buscar vitima do caso.");
+        console.error("Erro ao buscar vitima:", error);
+      }
+    }
+    buscarVitima();
+  }, [casoReferencia]);
+
+  // Buscar laudo quando um caso é selecionado
+  useEffect(() => {
+    async function buscarLaudo() {
+      if (!casoReferencia) {
+        //      setLaudo([]);
+        return;
+      }
+      try {
+        //      const response = await api.get(`/api/cases/${casoReferencia}/laudo`);
+        //      setEvidencias(response.data.vitima);
+      } catch (error) {
+        setError("Erro ao buscar laudo do caso.");
+        console.error("Erro ao buscar laudo:", error);
+      }
+    }
+    buscarLaudo();
   }, [casoReferencia]);
 
   const handleSubmit = async (e: FormEvent) => {
