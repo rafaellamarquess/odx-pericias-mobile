@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', // Alinha o botão Voltar e a barra de pesquisa horizontalmente
     alignItems: 'center',
     marginHorizontal: 20,
-    marginVertical: 10,
+    marginVertical: 5,
   },
   backButton: {
     padding: 5,

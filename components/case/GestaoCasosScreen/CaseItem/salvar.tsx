@@ -64,9 +64,8 @@ export const styles = StyleSheet.create({
   detailLabel: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#4A8481',
-    marginTop: 10,
-    marginBottom: 5,
+    color: '#333',
+    marginTop: 5,
   },
   detailText: {
     fontSize: 14,
@@ -108,64 +107,57 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContainer: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
     backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  scrollView: {
-    flex: 1,
+  modalContent: {
     backgroundColor: '#FFF',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
   },
   editModalContent: {
+    backgroundColor: '#FFF',
     padding: 25,
-    paddingBottom: 40,
-    backgroundColor: '#F5F5F5',
+    borderRadius: 15,
+    width: '90%',
+    maxHeight: '85%',
+    alignItems: 'center',
+    overflow: 'hidden',
   },
   modalTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#4A8481',
+    color: '#333',
     marginBottom: 15,
-    textAlign: 'center',
   },
   divider: {
     width: '100%',
-    height: 2,
-    backgroundColor: '#4A8481',
-    marginBottom: 20,
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    marginBottom: 15,
   },
   input: {
-    width: '100%',
+    width: '90%',
     height: 50,
-    borderColor: '#B0BEC5',
+    borderColor: '#CCC',
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
-    backgroundColor: '#FFF',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  lockedInput: {
-    backgroundColor: '#E0E0E0', // Cor cinza claro para indicar bloqueio
-    color: '#666',
   },
   multilineInput: {
-    height: 100,
+    height: 80,
     textAlignVertical: 'top',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
+    width: '90%',
     marginTop: 20,
-    marginBottom: 20,
-    paddingHorizontal: 15,
   },
   actionButton: {
     paddingVertical: 12,
@@ -183,35 +175,11 @@ export const styles = StyleSheet.create({
   saveButton: {
     backgroundColor: '#27AE60',
   },
-  actionButtonText: {
+  actionButtonText: { // Corrigido: Garantir que está definido
     fontSize: 16,
     color: '#FFF',
     fontWeight: '600',
     textAlign: 'center',
-  },
-  button: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginHorizontal: 5,
-  },
-  primaryButton: {
-    backgroundColor: '#27AE60',
-    elevation: 2,
-  },
-  secondaryButton: {
-    borderWidth: 1,
-    borderColor: '#666',
-    backgroundColor: 'transparent',
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-    color: '#333',
-  },
-  chevronIcon: {
-    marginLeft: 10,
   },
   modalMessage: {
     fontSize: 16,
@@ -240,38 +208,7 @@ export const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: '600',
   },
-  modalContent: {
-    backgroundColor: '#FFF',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-    alignItems: 'center',
-  },
-  lockedLabelContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  lockIcon: {
-    marginLeft: 5,
-  },
-  statusOptions: {
-    backgroundColor: '#FFF',
-    borderRadius: 8,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    marginTop: 5,
-    maxHeight: 150,
-  },
-  statusOption: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-  },
-  statusOptionText: {
-    fontSize: 16,
-    color: '#333',
-  },
+    chevronIcon: {
+        marginLeft: 10,
+    },
 });
