@@ -23,6 +23,26 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import tw from "twrnc";
 
+// Mock data
+const MOCK_CASOS = [
+  { _id: "case1", titulo: "Caso Mock 1" },
+  { _id: "case2", titulo: "Caso Mock 2" },
+];
+const MOCK_EVIDENCIAS = [
+  { _id: "ev1", categoria: "Categoria Mock A", tipo: "Tipo Mock X" },
+  { _id: "ev2", categoria: "Categoria Mock B", tipo: "Tipo Mock Y" },
+];
+const MOCK_VITIMAS = [
+  { _id: "vit1", nome: "Vítima Mock 1" },
+  { _id: "vit2", nome: "Vítima Mock 2" },
+];
+const MOCK_LAUDOS = [
+  { _id: "la1", descricao: "Laudo Mock 1" },
+  { _id: "la2", descricao: "Laudo Mock 2" },
+];
+// Mock PDF Base64
+const MOCK_PDF_BASE64 = "JVBERi0xLjQKJeLjz9MK...";
+
 export default function ElaborarRelatorio() {
   //para navegar entre as telas
   const router = useRouter();
@@ -255,6 +275,41 @@ export default function ElaborarRelatorio() {
       // }
       // console.error(err);
       setError("Erro simulado ao gerar o relatório.");
+      console.error(err);
+    }
+  };
+
+  const handleSign = async () => {
+    if (!reportId) {
+      setError("Nenhum relatório gerado para assinar.");
+      return;
+    }
+    try {
+      // const response = await api.post(`/api/report/sign/${reportId}`);
+      // const { pdf } = response.data;
+
+      const simulatedPdfBase64 =
+        "JVBERi0xLjQKJeLjz9MKMyAwIG9iago8PC9MZW5ndGggNDEvRmlsdGVyIC9GbGF0ZURlY29kZT4+CnN0cmVhbQpIZWxsbyBXb3JsZAplbmRzdHJlYW0KZW5kb2JqCg==";
+      const byteCharacters = atob(simulatedPdfBase64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+
+      console.log("PDF Assinado URL:", url);
+      setPdfUrl(url);
+      setSigned(true);
+      setError("");
+    } catch (err: unknown) {
+      // if (isAxiosError(err)) {
+      //   setError(err.response?.data?.msg || "Erro ao assinar o relatório.");
+      // } else {
+      //   setError("Erro ao assinar o relatório.");
+      // }
+      setError("Erro simulado ao assinar o relatório.");
       console.error(err);
     }
   };
@@ -656,6 +711,17 @@ export default function ElaborarRelatorio() {
 
               {submitted && pdfUrl ? (
                 <>
+                  {!signed && (
+                    <TouchableOpacity
+                      onPress={handleSign}
+                      style={tw`bg-green-600 px-6 py-3 rounded-lg mb-3`}
+                    >
+                      <Text style={tw`text-white font-semibold`}>
+                        Assinar Digitalmente
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
                   <TouchableOpacity
                     onPress={() => {
                       // Abre o PDF com o viewer padrão do sistema
