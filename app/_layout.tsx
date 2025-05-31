@@ -32,10 +32,8 @@ export default function RootLayout() {
         {/* Agora sem inicialRouteName forçado */}
         <Stack.Screen name="Login/index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="Case/NovoCasoScreen1" options={{ headerShown: false }} />
-        <Stack.Screen name="Case/NovoCasoScreen2" options={{ headerShown: false }} />
-        <Stack.Screen name="Case/NovoCasoScreen3" options={{ headerShown: false }} />
-        <Stack.Screen name="Case/NovoCasoScreen4" options={{ headerShown: false }} />
+        <Stack.Screen name="Case/NovoCasoScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="Case/GestaoCasosScreen" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
