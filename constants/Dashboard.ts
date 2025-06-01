@@ -22,20 +22,22 @@ const navButtons: { label: string; icon: IconDefinition }[] = [
   { label: 'Gestão Geral', icon: faFolder },
 ];
 
- const chartConfig = {
+const chartConfig = {
   backgroundGradientFrom: '#fff',
   backgroundGradientTo: '#fff',
   decimalPlaces: 0,
-  color: (opacity = 1) => `rgba(33, 150, 243, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(55, 65, 81, ${opacity})`, 
+  color: (opacity = 1) => `rgba(0,0,0,${opacity})`,
+  labelColor: (opacity = 1) => `rgba(55, 65, 81, ${opacity})`,
   style: {
     borderRadius: 16,
   },
   propsForLabels: {
-    fontSize: 14,
-    fontFamily: 'System', 
-    fontWeight: '500',
+    fontSize: 13,
+    fontWeight: '600',
   },
 };
+
+
+
 
 export {  filtros, navButtons, chartConfig };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { fetchDashboardData } from '@/lib/DashboardApi';
 import { DashboardData } from '@/Types/Dashboards';
 import TotalCasesCard from '@/components/Dashboard/TotalCasesCard';
@@ -14,17 +14,17 @@ const DashboardScreen: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [mesFiltro, setMesFiltro] = useState('2025-05');
-  const [dataFiltroSelecionada, setDataFiltroSelecionada] = useState('');
+  // Remova filtro de data por enquanto
+  // const [dataFiltroSelecionada, setDataFiltroSelecionada] = useState('');
   const [filtroSelecionado, setFiltroSelecionado] = useState<'vitima' | 'sexo' | 'estado' | 'lesoes' | 'cidade'>('vitima');
 
   const chartWidth = Dimensions.get('window').width - 32;
 
-  const loadData = async () => {
+  const loadData = async (mes?: string) => {
     setLoading(true);
     try {
-      const filters: { mes?: string; data?: string } = {};
-      if (mesFiltro) filters.mes = mesFiltro;
-      if (dataFiltroSelecionada) filters.data = dataFiltroSelecionada;
+      const filters: { mes?: string } = {};
+      if (mes) filters.mes = mes;
 
       const data = await fetchDashboardData(filters);
       console.log("Dados carregados no DashboardScreen:", data);
@@ -36,9 +36,20 @@ const DashboardScreen: React.FC = () => {
     }
   };
 
+  // Carrega dados só uma vez na montagem do componente, sem filtros ainda
   useEffect(() => {
-    loadData();
-  }, [mesFiltro, dataFiltroSelecionada]);
+    loadData(mesFiltro);
+  }, []);
+
+  // Função para validar o mês e chamar API ao clicar no botão filtrar
+  const handleFiltrar = () => {
+    const regexMes = /^\d{4}-(0[1-9]|1[0-2])$/; // YYYY-MM, mês 01-12
+    if (regexMes.test(mesFiltro)) {
+      loadData(mesFiltro);
+    } else {
+      Alert.alert('Filtro inválido', 'Digite um mês válido no formato YYYY-MM');
+    }
+  };
 
   if (loading) {
     return (
@@ -54,39 +65,33 @@ const DashboardScreen: React.FC = () => {
   }
 
   const colors = [
-  '#FF6B6B',
-  '#4ECDC4',
-  '#FFD93D',
-  '#1A535C',
-  '#FF9F1C',
-  '#2E294E',
-  '#E71D36',
-];
+    '#679AA3', '#73A5AE', '#416C72',
+  ];
 
- const getChartData = () => {
-  const dados = dashboardData[filtroSelecionado] || [];
-  const isPieChart = ['vitima', 'sexo'].includes(filtroSelecionado);
+  const getChartData = () => {
+    const dados = dashboardData[filtroSelecionado] || [];
+    const isPieChart = ['vitima', 'sexo'].includes(filtroSelecionado);
 
-  return {
-    labels: dados.map(item => item.categoria),
-    datasets: [
-      {
-        data: dados.map(item => item.quantidade),
-        ...(isPieChart
-          ? {
-              pieData: dados.map((item, index) => ({
-                value: item.quantidade,
-                name: item.categoria || 'Não Informado',
-                color: colors[index % colors.length],
-                legendFontColor: '#111827', // texto bem escuro
-                legendFontSize: 16,          // maior para legibilidade
-              })),
-            }
-          : {}),
-      },
-    ],
+    return {
+      labels: dados.map(item => item.categoria),
+      datasets: [
+        {
+          data: dados.map(item => item.quantidade),
+          ...(isPieChart
+            ? {
+                pieData: dados.map((item, index) => ({
+                  value: item.quantidade,
+                  name: item.categoria || 'Não Informado',
+                  color: colors[index % colors.length],
+                  legendFontColor: '#111827',
+                  legendFontSize: 16,
+                })),
+              }
+            : {}),
+        },
+      ],
+    };
   };
-};
 
   const chartData = getChartData();
 
@@ -98,8 +103,7 @@ const DashboardScreen: React.FC = () => {
         <PeriodFilters
           mesFiltro={mesFiltro}
           setMesFiltro={setMesFiltro}
-          dataFiltro={dataFiltroSelecionada}
-          setDataFiltro={setDataFiltroSelecionada}
+          onFiltrar={handleFiltrar} // <-- Aqui passa a função para disparar filtro
         />
         <FilterButtons
           filtroSelecionado={filtroSelecionado}

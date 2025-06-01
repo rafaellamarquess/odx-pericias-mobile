@@ -8,9 +8,10 @@ import { chartConfig } from '@/constants/Dashboard';
 interface MonthlyCasesChartProps {
   data: { mes: string; quantidade: number }[];
   width: number;
+  tipo?: 'mes' | 'dia';
 }
 
-const MonthlyCasesChart: React.FC<MonthlyCasesChartProps> = ({ data, width }) => {
+const MonthlyCasesChart: React.FC<MonthlyCasesChartProps> = ({ data, width, tipo = 'mes' }) => {
   if (!data || data.length === 0) {
     return (
       <View style={tw`bg-white p-4 rounded-lg shadow-md mb-4`}>
@@ -19,7 +20,10 @@ const MonthlyCasesChart: React.FC<MonthlyCasesChartProps> = ({ data, width }) =>
     );
   }
 
-  const validData = data.filter(item => typeof item.quantidade === 'number' && !isNaN(item.quantidade));
+  const validData = data.filter(
+    item => typeof item.quantidade === 'number' && !isNaN(item.quantidade)
+  );
+
   if (validData.length === 0) {
     return (
       <View style={tw`bg-white p-4 rounded-lg shadow-md mb-4`}>
@@ -28,14 +32,33 @@ const MonthlyCasesChart: React.FC<MonthlyCasesChartProps> = ({ data, width }) =>
     );
   }
 
+  const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
   const chartData = {
-    labels: validData.map(item => item.mes),
-    datasets: [{ data: validData.map(item => item.quantidade) }],
+    labels: validData.map(item => {
+      if (!item.mes) return 'Indef.';
+
+      if (tipo === 'mes') {
+        const [ano, mes] = item.mes.split('-');
+        const monthIndex = parseInt(mes, 10) - 1;
+        return `${monthNames[monthIndex]}/${ano?.slice(-2)}`;
+      } else {
+        const [ano, mes, dia] = item.mes.split('-');
+        return `${dia}/${mes}`;
+      }
+    }),
+    datasets: [
+      {
+        data: validData.map(item => item.quantidade),
+      },
+    ],
   };
 
   return (
     <View style={tw`bg-white p-4 rounded-lg shadow-md mb-4`}>
-      <Text style={tw`text-lg font-bold mb-2`}>Casos ao Longo dos Meses</Text>
+      <Text style={tw`text-lg font-bold mb-2`}>
+        Casos por {tipo === 'mes' ? 'Mês' : 'Dia'}
+      </Text>
       <LineChart
         data={chartData}
         width={width}
@@ -43,7 +66,7 @@ const MonthlyCasesChart: React.FC<MonthlyCasesChartProps> = ({ data, width }) =>
         yAxisLabel=""
         chartConfig={chartConfig}
         bezier
-        style={tw`rounded-2xl border-2 border-blue-500`}
+        style={tw`rounded-2xl border border-gray-300 bg-gray-50`}
       />
     </View>
   );
