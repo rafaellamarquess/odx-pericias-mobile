@@ -397,7 +397,7 @@ export default function ElaborarRelatorio() {
 
                 <Picker
                   selectedValue={casoReferencia}
-                  onValueChange={(itemValue) => setCasoReferencia(itemValue)}
+                  onValueChange={(itemValue: React.SetStateAction<string>) => setCasoReferencia(itemValue)}
                   style={tw`border p-2 rounded`}
                 >
                   <Picker.Item label="Selecione um Caso" value="" />

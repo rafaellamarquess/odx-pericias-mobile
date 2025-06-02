@@ -80,43 +80,45 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({
 
   const minBarWidth = 60;
   const adjustedWidth = Math.max(chartData.labels.length * minBarWidth, screenWidth);
-  const maxDataValue = Math.max(...chartData.datasets.flatMap(ds => ds.data), 0);
-  const segments = Math.max(2, Math.min(5, Math.ceil(maxDataValue / 2)));
+const maxDataValue = Math.max(...chartData.datasets.flatMap(ds => ds.data), 0);
+const allValuesSame = chartData.datasets.every(dataset =>
+  dataset.data.every(value => value === chartData.datasets[0].data[0])
+);
+const segments = allValuesSame ? 1 : Math.max(2, Math.min(5, Math.ceil(maxDataValue / 2)));
 
   const fixedColors = ['#679AA3', '#73A5AE', '#416C72'];
 
-  const barData = {
-    labels: chartData.labels,
-    datasets: chartData.datasets.map(dataset => ({
-      ...dataset,
-      data: dataset.data.map(value => (typeof value === 'number' && !isNaN(value) ? value : 0)),
-      colors: dataset.data.map((_, i) => () => fixedColors[i % fixedColors.length]),
-    })),
-  };
-
+ const barData = {
+  labels: chartData.labels,
+  datasets: chartData.datasets.map((dataset, datasetIndex) => ({
+    ...dataset,
+    data: dataset.data.map(value => (typeof value === 'number' && !isNaN(value) ? value : 0)),
+    color: (opacity = 1) => fixedColors[datasetIndex % fixedColors.length],
+  })),
+};
   const commonBarProps = {
-    width: adjustedWidth,
-    height: Math.min(320, screenHeight * 0.4),
-    yAxisLabel: '',
-    yAxisSuffix: '',
-    chartConfig: {
-      ...chartConfig,
-      backgroundGradientFrom: undefined,
-      backgroundGradientTo: undefined,
-      color: (opacity = 1, index = 0) => fixedColors[index % fixedColors.length],
-    },
-    style: tw`rounded-2xl border border-gray-300 bg-gray-50`,
-    withInnerLines: false,
-    showValuesOnTopOfBars: true,
-    verticalLabelRotation: chartData.labels.length > 6 ? 60 : 30,
-    fromZero: true,
-    withHorizontalLabels: true,
-    withCustomBarColorFromData: true,
-    segments: segments,
-    barPercentage: chartData.labels.length > 6 ? 0.5 : 0.7,
-    yLabelsOffset: 8,
-    flatColor: true,
-  };
+  width: adjustedWidth,
+  height: Math.min(320, screenHeight * 0.4),
+  yAxisLabel: '',
+  yAxisSuffix: '',
+  chartConfig: {
+    ...chartConfig,
+    color: (opacity = 1) => `rgba(0,0,0,${opacity})`, 
+  },
+  style: tw`rounded-2xl border border-gray-300 bg-gray-50`,
+  withInnerLines: false,
+  showValuesOnTopOfBars: true,
+  verticalLabelRotation: chartData.labels.length > 6 ? 60 : 30,
+  fromZero: true,
+  withHorizontalLabels: true,
+  
+  // withCustomBarColorFromData: true,
+  // flatColor: true,
+  segments: segments,
+  barPercentage: chartData.labels.length > 6 ? 0.5 : 0.7,
+  yLabelsOffset: 8,
+};
+
 
   return (
     <View style={tw`bg-white p-4 rounded-lg shadow-md mb-4`}>

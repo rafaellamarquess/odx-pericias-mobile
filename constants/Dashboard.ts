@@ -34,6 +34,7 @@ const chartConfig = {
   propsForLabels: {
     fontSize: 13,
     fontWeight: '600',
+    
   },
 };
 
