@@ -1,11 +1,6 @@
 import React from "react";
 import { Ionicons as Icon } from "@expo/vector-icons";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-} from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
 
@@ -15,14 +10,14 @@ const GestaoGeral = () => {
   return (
     <View style={tw`flex-1 bg-white`}>
       {/* HEADER */}
-      <View style={tw`flex-row items-center px-4 py-3 bg-[#679AA3] rounded-b-3xl`}>
+      <View
+        style={tw`flex-row items-center px-4 py-3 bg-[#679AA3] rounded-b-3xl`}
+      >
         <TouchableOpacity onPress={() => router.back()}>
           <Icon name="chevron-back-circle-outline" size={32} color="#000" />
         </TouchableOpacity>
 
-        <Text style={tw`text-white text-xl font-bold ml-4`}>
-          Elaborar Relatório
-        </Text>
+        <Text style={tw`text-white text-xl font-bold ml-4`}>Gestão Geral</Text>
 
         <Image
           source={require("../../assets/images/Logo-odx.png")}
