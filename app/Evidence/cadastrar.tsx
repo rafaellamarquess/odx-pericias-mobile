@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -340,3 +341,17 @@ const NovaEvidenciaScreen = () => {
 };
 
 export default NovaEvidenciaScreen;
+=======
+import React from 'react';
+import { View, Text } from 'react-native';
+
+const DetalhesCasoScreen: React.FC = () => {
+  return (
+    <View>
+      <Text>Detalhes do Caso</Text>
+    </View>
+  );
+};
+
+export default DetalhesCasoScreen;
+>>>>>>> Lucas
