@@ -744,7 +744,7 @@ export default function ElaborarRelatorio() {
               )}
 
               <TouchableOpacity
-                onPress={() => router.push("/ReportScreen")}
+                onPress={() => router.push("/ReportScreen/lista")}
                 style={tw`bg-gray-300 px-6 py-3 rounded-lg mb-3`}
               >
                 <Text>Ver lista de relatórios</Text>
