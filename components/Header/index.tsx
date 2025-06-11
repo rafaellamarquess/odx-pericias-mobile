@@ -12,8 +12,9 @@ interface HeaderProps {
 const Header = ({ title }: HeaderProps) => {
   const { handleLogout } = useAuth();
 
+
   return (
-    <View style={[tw`flex-row items-center justify-between py-5 px-4 bg-[#679AA3] rounded-b-2xl`, { minHeight: 110 }]}>
+    <View style={[tw`flex-row items-center justify-between py-5 px-4 bg-[#364153] rounded-b-2xl`, { minHeight: 110 }]}> {/* cor anterior: [#679AA3] */}
       <TouchableOpacity onPress={() => router.back()}>
         <Icon name="chevron-back" size={36} color="white" />
       </TouchableOpacity>

@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import tw from 'twrnc';
+import Header from '../../components/Header';
 
 export default function IndexScreen() {
   const router = useRouter();
@@ -23,18 +24,9 @@ export default function IndexScreen() {
 
   return (
     <View style={tw`flex-1 bg-[#F8F9FA]`}>
-      {/* Cabeçalho */}
-      <View style={tw`flex-row items-center justify-between p-4 bg-[#679AA3] rounded-b-2xl`}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={36} color="white" />
-        </TouchableOpacity>
-        <Text style={tw`text-white text-lg font-semibold`}>Gestão de Usuários</Text>
-        <Image
-          source={require('../../assets/images/Logo-odx.png')}
-          style={tw`w-8 h-8 ml-2`}
-          resizeMode="contain"
-        />
-      </View>
+      {/* HEADER */}
+      <Header title="Gestão de Usuários" />
+
 
       {/* Área Principal */}
       <View style={tw`flex-1 mx-4 mt-4 mb-20 p-6`}>

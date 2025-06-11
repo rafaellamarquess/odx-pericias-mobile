@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import tw from 'twrnc';
-import Header from '../../components/Case/NovoCasoScreen/Header';
-import FormContainer from '../../components/Case/NovoCasoScreen/FormContainer';
-import FormSection from '../../components/Case/NovoCasoScreen/FormSection';
-import StepIndicator from '../../components/Case/NovoCasoScreen/StepIndicator';
+import Header from '../../components/Header'; // Updated import
+import FormContainer from '../../components/Forms/FormContainer';
+import FormSection from '../../components/Forms/FormSection';
+import StepIndicator from '../../components/StepIndicator/StepIndicator';
 import ConfirmSaveModal from '../../components/Case/NovoCasoScreen/Modals/ConfirmSaveModal';
 import AddEvidenceModal from '../../components/Case/NovoCasoScreen/Modals/AddEvidenceModal';
 
@@ -36,8 +36,7 @@ const NovoCasoScreen = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showEvidenceModal, setShowEvidenceModal] = useState(false);
 
- const handleInputChange = (name: string, value: string) => {
-    // Mapear o nome para as chaves de formData
+  const handleInputChange = (name: string, value: string) => {
     const formKeys: { [key: string]: keyof typeof formData } = {
       title: 'title',
       description: 'description',
@@ -71,13 +70,13 @@ const NovoCasoScreen = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      setShowConfirmModal(true);// Mostra o primeiro modal
+      setShowConfirmModal(true);
     }, 2000);
   };
 
   const handleCloseConfirmModal = () => {
     setShowConfirmModal(false);
-    setShowEvidenceModal(true); // Mostra o segundo modal após fechar o primeiro
+    setShowEvidenceModal(true);
   };
 
   const renderConteudoEtapa = () => {
@@ -85,7 +84,7 @@ const NovoCasoScreen = () => {
       case 1:
         return (
           <>
-            <Text style={tw`text-[18px] text-[#333] mt-[20px] mb-0 font-bold  text-center`}>Informações Iniciais do Caso</Text>
+            <Text style={tw`text-[18px] text-[#333] mt-[20px] mb-0 font-bold text-center`}>Informações Iniciais do Caso</Text>
             <FormContainer>
               <FormSection
                 fields={[
@@ -101,7 +100,7 @@ const NovoCasoScreen = () => {
       case 2:
         return (
           <>
-            <Text style={tw`text-[18px] text-[#333] mt-[20px] mb-0 font-bold  text-center`}>Atribuições e Status</Text>
+            <Text style={tw`text-[18px] text-[#333] mt-[20px] mb-0 font-bold text-center`}>Atribuições e Status</Text>
             <FormContainer>
               <FormSection
                 fields={[
@@ -140,10 +139,9 @@ const NovoCasoScreen = () => {
         };
 
         return (
-        <ScrollView style={tw`flex-1`}>
+          <ScrollView style={tw`flex-1`}>
             <View style={tw`mx-5 mt-5`}>
               <Text style={tw`text-[18px] text-[#333] font-bold mb-4 text-center`}>Revisão Final do Caso</Text>
-              {/* Cartão: Informações do Caso */}
               <View style={tw`bg-white rounded-[15px] p-5 mb-5 shadow-lg elevation-8 border border-gray-200`}>
                 <Text style={tw`text-[16px] text-[#333] font-bold mb-3 border-b border-gray-200 pb-2`}>Informações do Caso</Text>
                 <View style={tw`mb-3`}>
@@ -163,7 +161,6 @@ const NovoCasoScreen = () => {
                   <Text style={tw`text-[14px] text-[#555] mt-1`}>{caseData.responsible}</Text>
                 </View>
               </View>
-              {/* Cartão: Localização */}
               <View style={tw`bg-white rounded-[15px] p-5 mb-5 shadow-lg elevation-8 border border-gray-200`}>
                 <Text style={tw`text-[16px] text-[#333] font-bold mb-3 border-b border-gray-200 pb-2`}>Localização</Text>
                 <View style={tw`mb-3`}>
@@ -175,7 +172,6 @@ const NovoCasoScreen = () => {
                   <Text style={tw`text-[14px] text-[#555] mt-1`}>{caseData.state}</Text>
                 </View>
               </View>
-              {/* Cartão: Detalhes Adicionais */}
               <View style={tw`bg-white rounded-[15px] p-5 mb-5 shadow-lg elevation-8 border border-gray-200`}>
                 <Text style={tw`text-[16px] text-[#333] font-bold mb-3 border-b border-gray-200 pb-2`}>Detalhes Adicionais</Text>
                 <View style={tw`mb-3`}>
@@ -207,7 +203,6 @@ const NovoCasoScreen = () => {
           </ScrollView>
         );
 
-      
       default:
         return null;
     }
@@ -220,11 +215,11 @@ const NovoCasoScreen = () => {
       {renderConteudoEtapa()}
       {etapa < 3 && (
         <TouchableOpacity
-          style={tw`bg-[#679AA3] rounded-[10px] py-3 mx-10 mt-5 shadow-lg elevation-5`} // Sombra e elevação
+          style={tw`bg-[#679AA3] rounded-[10px] py-3 mx-10 mt-5 shadow-lg elevation-5`}
           onPress={handleNext}
           activeOpacity={0.8}
         >
-        <Text style={tw`text-white text-[16px] font-bold text-center`}>Próximo</Text>
+          <Text style={tw`text-white text-[16px] font-bold text-center`}>Próximo</Text>
         </TouchableOpacity>
       )}
       <ConfirmSaveModal

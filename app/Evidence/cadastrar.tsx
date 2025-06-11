@@ -14,15 +14,15 @@ import { useRouter } from 'expo-router';
 import tw from 'twrnc';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
-import ConfirmSaveModal from '../../components/Evidence/NovaEvidenceScreen/Modals/ConfirmSaveModal';
-import AddImageModal from '../../components/Evidence/NovaEvidenceScreen/Modals/AddImageModal';
+import ConfirmSaveModal from '../../components/Evidence/NovaEvidenciasScreen/Modals/ConfirmSaveModal';
+import AddImageModal from '../../components/Evidence/NovaEvidenciasScreen/Modals/AddImageModal';
 import { Input, Textarea, Select, PrimaryButton } from '../../components/Evidence/FormComponents';
-import { Evidence, EvidenceListResponse } from '../../types/Evidence';
+import { IEvidence, EvidenceListResponse } from '../../types/Evidence';
 import { IVitima, VitimaListResponse } from '../../types/Vitima';
 import { FilterOptions } from '../../types/FilterOptions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../../components/Header';
-import StepIndicator from '@/components/Case/NovoCasoScreen/StepIndicator';
+import StepIndicator from '@/components/StepIndicator/StepIndicator';
 
 const NovaEvidenciaScreen = () => {
   const router = useRouter();
@@ -57,7 +57,7 @@ const NovaEvidenciaScreen = () => {
   >('inteiro');
   const [vitimaLesoes, setVitimaLesoes] = useState('');
   const [vitimaIdentificada, setVitimaIdentificada] = useState(false);
-  const [existingEvidences, setExistingEvidences] = useState<Evidence[]>([]);
+  const [existingEvidences, setExistingEvidences] = useState<IEvidence[]>([]);
 
   // Filter options
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({

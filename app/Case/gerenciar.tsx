@@ -1,69 +1,60 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, FlatList, StyleSheet, SafeAreaView, Alert, TouchableWithoutFeedback } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import Header from '../../components/Case/NovoCasoScreen/Header';
+import { useState, useEffect } from 'react';
+import { SafeAreaView, View, Text, Alert } from 'react-native';
+import tw from 'twrnc';
 import { useRouter } from 'expo-router';
-import SearchBar from '../../components/Case/GestaoCasosScreen/SearchBar';
-import StatusFilter from '../../components/Case/GestaoCasosScreen/StatusFilter';
+import { useAuth } from '../../contexts/AuthContext';
+import Header from '../../components/Header';
+import SearchBar from '../../components/SearchBar/SearchBar';
+import StatusFilter from '../../components/StatusFilter/StatusFilter';
 import CaseList from '../../components/Case/GestaoCasosScreen/CaseList';
 import FloatingActionButton from '../../components/Case/GestaoCasosScreen/FloatingActionButton';
-
-// Interface para tipar os casos
-interface Case {
-  id: string;
-  title: string;
-  reference: string;
-  status: string;
-  creationDate: string;
-  responsible: string;
-  description?: string;
-  city?: string;
-  state?: string;
-  evidence?: string;
-}
+import { ICase } from '../../types/Case';
+import * as Haptics from 'expo-haptics';
+import { Platform } from 'react-native';
 
 const GestaoCasosScreen = () => {
   const router = useRouter();
-  const [searchText, setSearchText] = useState<string>('');
+  const { user, loading: authLoading, error: authError } = useAuth();
+  const [searchText, setSearchText] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [filteredCases, setFilteredCases] = useState<Case[]>([]);
+  const [filteredCases, setFilteredCases] = useState<ICase[]>([]);
   const statusOptions = ['Em andamento', 'Arquivado', 'Finalizado'];
-  const [activeCaseId, setActiveCaseId] = useState<string | null>(null);
 
-  const [cases, setCases] = useState<Case[]>([
+  const [cases, setCases] = useState<ICase[]>([
     {
-      id: '1',
-      title: 'Caso Exemplo 1',
-      reference: 'CASO-001',
+      _id: '1',
+      titulo: 'Caso Exemplo 1',
+      casoReferencia: 'CASO-001',
       status: 'Em andamento',
-      creationDate: '19/05/2025',
-      responsible: 'João Silva',
+      dataCriacao: '2025-05-19',
+      responsavel: 'João Silva',
+      descricao: 'Descrição do caso exemplo 1.',
+      cidade: 'São Paulo',
+      estado: 'SP',
     },
     {
-      id: '2',
-      title: 'Caso Exemplo 2',
-      reference: 'CASO-002',
+      _id: '2',
+      titulo: 'Caso Exemplo 2',
+      casoReferencia: 'CASO-002',
       status: 'Finalizado',
-      creationDate: '19/05/2025',
-      responsible: 'Maria Oliveira',
+      dataCriacao: '2025-05-19',
+      responsavel: 'Maria Oliveira',
+      descricao: 'Descrição do caso exemplo 2.',
+      cidade: 'Rio de Janeiro',
+      estado: 'RJ',
     },
     {
-      id: '3',
-      title: 'Caso Exemplo 3',
-      reference: 'CASO-003',
+      _id: '3',
+      titulo: 'Caso Exemplo 3',
+      casoReferencia: 'CASO-003',
       status: 'Em andamento',
-      creationDate: '19/05/2025',
-      responsible: 'Carlos Souza',
+      dataCriacao: '2025-05-19',
+      responsavel: 'Carlos Souza',
+      descricao: 'Descrição do caso exemplo 3.',
+      cidade: 'Belo Horizonte',
+      estado: 'MG',
     },
   ]);
-
-  useEffect(() => {
-    setFilteredCases(cases);
-  }, [cases]);
-
-  useEffect(() => {
-    // Simula a busca de casos do backend
-  }, []);
 
   useEffect(() => {
     let filtered = [...cases];
@@ -75,8 +66,8 @@ const GestaoCasosScreen = () => {
     if (searchText.trim()) {
       filtered = filtered.filter(
         (caseItem) =>
-          caseItem.title.toLowerCase().includes(searchText.toLowerCase()) ||
-          caseItem.reference.toLowerCase().includes(searchText.toLowerCase())
+          caseItem.titulo.toLowerCase().includes(searchText.toLowerCase()) ||
+          caseItem.casoReferencia.toLowerCase().includes(searchText.toLowerCase())
       );
     }
 
@@ -89,76 +80,76 @@ const GestaoCasosScreen = () => {
     } else {
       setSelectedStatus(status);
     }
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert('Confirmar Exclusão', 'Deseja realmente excluir este caso?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Excluir', style: 'destructive', onPress: () => {
-        setCases(cases.filter(c => c.id !== id));
-        setFilteredCases(filteredCases.filter(c => c.id !== id));
-        setActiveCaseId(null);
-      } },
+    Alert.alert('Confirmar Exclusão', 'Você deseja realmente excluir este caso?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Excluir',
+        style: 'destructive',
+        onPress: () => {
+          setCases(cases.filter((c) => c._id !== id));
+          setFilteredCases(cases.filter((c) => c._id !== id));
+          if (Platform.OS !== 'web') {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          }
+        },
+      },
     ]);
   };
 
-  const handleEdit = (id: string, updatedCase: Case) => {
-    setCases(cases.map(c => c.id === id ? { ...c, ...updatedCase } : c));
-    setFilteredCases(filteredCases.map(c => c.id === id ? { ...c, ...updatedCase } : c));
-    // TODO: Integração com backend - Enviar updatedCase para o endpoint de atualização
-    // Exemplo de chamada com fetch:
-    // fetch(`https://your-backend-api.com/cases/${id}`, {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(updatedCase),
-    // })
-    // .then(response => response.json())
-    // .then(data => console.log('Caso atualizado:', data))
-    // .catch(error => console.error('Erro ao atualizar:', error));
+  const handleEdit = (id: string, updatedCase: Partial<ICase>) => {
+    setCases(cases.map((c) => (c._id === id ? { ...c, ...updatedCase } : c)));
+    setFilteredCases(cases.map((c) => (c._id === id ? { ...c, ...updatedCase } : c)));
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
   };
 
-  const onLongPress = (id: string) => {
-    setActiveCaseId(id === activeCaseId ? null : id);
-  };
+  if (authLoading) {
+    return (
+      <SafeAreaView style={tw`flex-1 justify-center items-center bg-[#F5F5F5]`}>
+        <Text style={tw`text-gray-600 mt-4`}>Carregando...</Text>
+      </SafeAreaView>
+    );
+  }
 
-  const onOutsidePress = () => {
-    setActiveCaseId(null);
-  };
+  if (authError) {
+    return (
+      <SafeAreaView style={tw`flex-1 justify-center items-center bg-[#F5F5F5]`}>
+        <Text style={tw`text-red-500 text-center px-5`}>Erro de autenticação: {authError}</Text>
+      </SafeAreaView>
+    );
+  }
+  //DESCOMENTAR QUANDO IMPLEMENTAR AUTH
+  // if (!user || !['admin', 'perito', 'assistente'].includes(user.perfil.toLowerCase())) {
+  //   router.push('/(tabs)/home');
+  //   return null;
+  // }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <TouchableWithoutFeedback onPress={onOutsidePress}>
-        <View style={styles.content}>
-          <Header title="GESTÃO DE CASOS" />
-          <SearchBar searchText={searchText} setSearchText={setSearchText} />
-          <StatusFilter
-            statusOptions={statusOptions}
-            selectedStatus={selectedStatus}
-            toggleStatusFilter={toggleStatusFilter}
-          />
-          <CaseList
-            filteredCases={filteredCases}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-            activeCaseId={activeCaseId}
-            onLongPress={onLongPress}
-            onOutsidePress={onOutsidePress}
-          />
-        </View>
-      </TouchableWithoutFeedback>
+    <SafeAreaView style={tw`flex-1 bg-[#F5F5F5]`}>
+      <View style={tw`flex-1`}>
+        <Header title="GESTÃO DE CASOS" />
+        <SearchBar searchText={searchText} setSearchText={setSearchText} />
+        <StatusFilter
+          statusOptions={statusOptions}
+          selectedStatus={selectedStatus}
+          toggleStatusFilter={toggleStatusFilter}
+        />
+        <CaseList
+          filteredCases={filteredCases}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+        />
+      </View>
       <FloatingActionButton />
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-  content: {
-    flex: 1,
-  },
-});
 
 export default GestaoCasosScreen;

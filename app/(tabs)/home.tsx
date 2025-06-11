@@ -54,41 +54,42 @@ export default function Home() {
 
   const menuItems = [
     {
-      title: 'Gestão de Usuários',
-      icon: 'people',
-      path: '/User',
-      allowed: ['admin'],
-    },
-    {
-      title: 'Novo Caso',
-      icon: 'note-add',
-      path: '/Case/cadastrar',
-      allowed: ['admin', 'perito'],
-    },
-    {
-      title: 'Nova Evidência',
-      icon: 'science',
-      path: '/Evidence/cadastrar',
-      allowed: ['admin', 'perito', 'assistente'],
-    },
-    {
-      title: 'Elaborar Laudos',
-      icon: 'description',
-      path: '/Laudo/cadastrar',
-      allowed: ['admin', 'perito', 'assistente'],
-    },
-    {
-      title: 'Elaborar Relatório',
-      icon: 'bar-chart',
-      path: '/Report/cadastrar',
-      allowed: ['admin', 'perito', 'assistente'],
-    },
-    {
       title: 'Gestão Geral',
       icon: 'folder-open',
       path: '/GestaoGeral',
       allowed: ['admin', 'perito', 'assistente'],
     },
+    {
+      title: 'Casos',
+      icon: 'note-add',
+      path: '/Case/cadastrar',
+      allowed: ['admin', 'perito'],
+    },
+    {
+      title: 'Evidência',
+      icon: 'science',
+      path: '/Evidence/cadastrar',
+      allowed: ['admin', 'perito', 'assistente'],
+    },
+    {
+      title: 'Laudos',
+      icon: 'description',
+      path: '/Laudo/cadastrar',
+      allowed: ['admin', 'perito', 'assistente'],
+    },
+    {
+      title: 'Relatórios',
+      icon: 'bar-chart',
+      path: '/Report/cadastrar',
+      allowed: ['admin', 'perito', 'assistente'],
+    },
+    {
+      title: 'Usuários',
+      icon: 'people',
+      path: '/User',
+      allowed: ['admin'],
+    },
+
     {
       title: 'Dashboard',
       icon: 'visibility',

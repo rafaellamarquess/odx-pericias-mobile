@@ -34,8 +34,10 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="Case/cadastrar" options={{ headerShown: false }} />
           <Stack.Screen name="Case/gerenciar" options={{ headerShown: false }} />
-          <Stack.Screen name="Evidence/cadastrar" options={{ headerShown: false }} /> 
-          <Stack.Screen name="Laudo/cadastrar" options={{ headerShown: false }} /> 
+          <Stack.Screen name="Evidence/cadastrar" options={{ headerShown: false }} />
+          <Stack.Screen name="Evidence/gestao" options={{ headerShown: false }} />
+          <Stack.Screen name="Evidence/editar" options={{ headerShown: false }} />
+          <Stack.Screen name="Laudo/cadastrar" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />

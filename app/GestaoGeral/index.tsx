@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
 import Dashboard from "../../components/Dashboard/Index";
-import Header from "../../components/Header" // Importando o componente Dashboard
+import Header from "../../components/Header"
 
 const GestaoGeral = () => {
   const router = useRouter();
@@ -17,7 +17,7 @@ const GestaoGeral = () => {
   return (
     <View style={tw`flex-1 bg-[#F8F9FA]`}>
       {/* HEADER */}
-      <Header title="Gestão Geral" onLogout={handleLogout} />
+      <Header title="Gestão Geral" />
 
       {/* BOTÕES CENTRAIS */}
       <View style={tw`flex-1 mx-4 mt-4 mb-20 p-6`}>
