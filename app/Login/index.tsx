@@ -16,18 +16,18 @@ export default function Login() {
   const handleLogin = () => {
     console.log('Email:', email);
     console.log('Password:', password);
-    router.replace('/User'); // Corrigido para /User
+    router.replace('/(tabs)/home');
   };
 
   return (
-    <View style={tw`flex-1 bg-[#679AA3] justify-end`}>
-      <View style={tw`flex-row items-center justify-center mb-32`}>
+    <View style={tw`flex-1 bg-[#364153] justify-end`}>
+      <View style={tw`flex-row items-center mb-30`}>
         <Image
-          source={require('../../assets/images/logo.png')}
-          style={tw`w-24 h-24 mr-4`}
+          source={require('../../assets/images/Logo.png')}
+          style={tw`w-50 h-80 mr-10`}
         />
         <View>
-          <Text style={tw`text-4xl font-bold text-[#416C72] mb-2`}>ODX</Text>
+          <Text style={tw`text-3xl font-bold text-[#416C72] mb-2`}>ODX</Text>
           <Text style={tw`text-2xl font-medium text-white`}>PERÍCIAS</Text>
         </View>
       </View>

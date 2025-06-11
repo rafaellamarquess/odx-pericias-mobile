@@ -1,111 +1,223 @@
-<<<<<<< HEAD
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native';
+// app/Evidence/cadastrar.tsx
+import { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  SafeAreaView,
+  TouchableOpacity,
+  Image,
+  Switch,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import tw from 'twrnc';
-import Header from '../../components/case/NovoCasoScreen/Header';
-import FormContainer from '../../components/case/NovoCasoScreen/FormContainer';
-import FormSection from '../../components/case/NovoCasoScreen/FormSection';
-import StepIndicator from '../../components/case/NovoCasoScreen/StepIndicator';
-import ConfirmSaveModal from '../../components/evidence/NovaEvidenciaScreen/Modals/ConfirmSaveModal';
-import AddImageModal from '../../components/evidence/NovaEvidenciaScreen/Modals/AddImageModal';
 import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
+import ConfirmSaveModal from '../../components/Evidence/NovaEvidenceScreen/Modals/ConfirmSaveModal';
+import AddImageModal from '../../components/Evidence/NovaEvidenceScreen/Modals/AddImageModal';
+import { Input, Textarea, Select, PrimaryButton } from '../../components/Evidence/FormComponents';
+import { Evidence, EvidenceListResponse } from '../../types/Evidence';
+import { IVitima, VitimaListResponse } from '../../types/Vitima';
+import { FilterOptions } from '../../types/FilterOptions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Header from '../../components/Header';
+import StepIndicator from '@/components/Case/NovoCasoScreen/StepIndicator';
 
 const NovaEvidenciaScreen = () => {
   const router = useRouter();
+  const { user, loading: authLoading, error: authError } = useAuth();
   const [etapa, setEtapa] = useState(1);
-  const [formData, setFormData] = useState<{
-    categoria: string;
-    tipo: string;
-    coletadoPor: string;
-    casoReferencia: string;
-    nome: string;
-    sexo: string;
-    estadoCorpo: string;
-    idadeAproximada: string;
-    nacionalidade: string;
-    cidade: string;
-    lesoes: string;
-    identificada: boolean;
-    conteudo: string;
-    imagemUri: string;
-  }>({
-    categoria: '',
-    tipo: '',
-    coletadoPor: '',
-    casoReferencia: '',
-    nome: '',
-    sexo: '',
-    estadoCorpo: '',
-    idadeAproximada: '',
-    nacionalidade: '',
-    cidade: '',
-    lesoes: '',
-    identificada: false,
-    conteudo: '',
-    imagemUri: '',
-  });
-
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
 
-  const handleInputChange = (name: string, value: string | boolean) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  // Evidence states
+  const [casoReferencia, setCasoReferencia] = useState('');
+  const [tipo, setTipo] = useState<'imagem' | 'texto'>('texto');
+  const [categoria, setCategoria] = useState('');
+  const [coletadoPor, setColetadoPor] = useState('');
+  const [texto, setTexto] = useState('');
+  const [imagemUri, setImagemUri] = useState('');
+
+  // Victim states
+  const [vitimas, setVitimas] = useState<IVitima[]>([]);
+  const [selectedVitimaId, setSelectedVitimaId] = useState('');
+  const [createNewVitima, setCreateNewVitima] = useState(false);
+  const [vitimaNome, setVitimaNome] = useState('');
+  const [vitimaDataNascimento, setVitimaDataNascimento] = useState('');
+  const [vitimaIdadeAproximada, setVitimaIdadeAproximada] = useState('');
+  const [vitimaNacionalidade, setVitimaNacionalidade] = useState('');
+  const [vitimaCidade, setVitimaCidade] = useState('');
+  const [vitimaSexo, setVitimaSexo] = useState<'masculino' | 'feminino' | 'indeterminado'>('masculino');
+  const [vitimaEstadoCorpo, setVitimaEstadoCorpo] = useState<
+    'inteiro' | 'fragmentado' | 'carbonizado' | 'putrefacto' | 'esqueleto'
+  >('inteiro');
+  const [vitimaLesoes, setVitimaLesoes] = useState('');
+  const [vitimaIdentificada, setVitimaIdentificada] = useState(false);
+  const [existingEvidences, setExistingEvidences] = useState<Evidence[]>([]);
+
+  // Filter options
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    coletadoPor: [],
+    casos: [],
+    cidades: [],
+    lesoes: [],
+    sexos: [],
+  });
+
+  // Form validation
+  const isFormValid =
+    casoReferencia &&
+    categoria &&
+    coletadoPor &&
+    (tipo === 'texto' ? texto : imagemUri) &&
+    (createNewVitima ? vitimaSexo && vitimaEstadoCorpo : selectedVitimaId);
+
+  // Fetch victims and filter options
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const token = await AsyncStorage.getItem('authToken');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+
+        // Fetch victims
+        const vitimaResponse = await axios.get<VitimaListResponse>('YOUR_API_URL/api/vitima', config);
+        setVitimas(vitimaResponse.data.data || []);
+
+        // Fetch filter options
+        const filterResponse = await axios.get<FilterOptions>('YOUR_API_URL/api/evidence/filters', config);
+        setFilterOptions({
+          coletadoPor: Array.isArray(filterResponse.data.coletadoPor) ? filterResponse.data.coletadoPor : [],
+          casos: Array.isArray(filterResponse.data.casos) ? filterResponse.data.casos : [],
+          cidades: Array.isArray(filterResponse.data.cidades) ? filterResponse.data.cidades : [],
+          lesoes: Array.isArray(filterResponse.data.lesoes) ? filterResponse.data.lesoes : [],
+          sexos: Array.isArray(filterResponse.data.sexos) ? filterResponse.data.sexos : [],
+        });
+
+        setError('');
+      } catch (err: any) {
+        setError(err.response?.data?.msg || 'Erro ao buscar dados.');
+        setVitimas([]);
+        setFilterOptions({ coletadoPor: [], casos: [], cidades: [], lesoes: [], sexos: [] });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user && !authLoading) {
+      fetchData();
+    }
+  }, [user, authLoading]);
+
+  // Fetch existing evidences for selected victim
+  useEffect(() => {
+    const fetchEvidences = async () => {
+      if (selectedVitimaId && !createNewVitima) {
+        setIsLoading(true);
+        try {
+          const token = await AsyncStorage.getItem('authToken');
+          const response = await axios.get<EvidenceListResponse>('YOUR_API_URL/api/evidence', {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { vitima: selectedVitimaId },
+          });
+          setExistingEvidences(response.data.evidencias || []);
+          setError('');
+        } catch (err: any) {
+          setError(err.response?.data?.msg || 'Erro ao buscar evidências existentes.');
+          setExistingEvidences([]);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setExistingEvidences([]);
+      }
+    };
+    fetchEvidences();
+  }, [selectedVitimaId, createNewVitima]);
+
+  // Handle form submission
+  const handleSubmit = async () => {
+    if (!isFormValid) {
+      setError('Preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('casoReferencia', casoReferencia);
+      formData.append('tipo', tipo);
+      formData.append('categoria', categoria);
+      formData.append('coletadoPor', coletadoPor);
+      if (tipo === 'texto' && texto) formData.append('texto', texto);
+      if (tipo === 'imagem' && imagemUri) {
+        formData.append('file', {
+          uri: imagemUri,
+          name: 'evidence.jpg',
+          type: 'image/jpeg',
+        } as any);
+      }
+
+      if (createNewVitima) {
+        if (vitimaNome) formData.append('nome', vitimaNome);
+        if (vitimaDataNascimento) formData.append('dataNascimento', vitimaDataNascimento);
+        if (vitimaIdadeAproximada) formData.append('idadeAproximada', vitimaIdadeAproximada);
+        if (vitimaNacionalidade) formData.append('nacionalidade', vitimaNacionalidade);
+        if (vitimaCidade) formData.append('cidade', vitimaCidade);
+        formData.append('sexo', vitimaSexo);
+        formData.append('estadoCorpo', vitimaEstadoCorpo);
+        if (vitimaLesoes) formData.append('lesoes', vitimaLesoes);
+        formData.append('identificada', vitimaIdentificada.toString());
+      } else {
+        formData.append('vitimaId', selectedVitimaId);
+      }
+
+      const token = await AsyncStorage.getItem('authToken');
+      await axios.post('YOUR_API_URL/api/evidence', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setSuccess('Evidência cadastrada com sucesso!');
+      setError('');
+      setShowConfirmModal(true);
+      // Reset form
+      setCasoReferencia('');
+      setTipo('texto');
+      setCategoria('');
+      setColetadoPor('');
+      setTexto('');
+      setImagemUri('');
+      setSelectedVitimaId('');
+      setCreateNewVitima(false);
+      setVitimaNome('');
+      setVitimaDataNascimento('');
+      setVitimaIdadeAproximada('');
+      setVitimaNacionalidade('');
+      setVitimaCidade('');
+      setVitimaSexo('masculino');
+      setVitimaEstadoCorpo('inteiro');
+      setVitimaLesoes('');
+      setVitimaIdentificada(false);
+      setExistingEvidences([]);
+    } catch (err: any) {
+      setError(err.response?.data?.msg || 'Erro ao cadastrar evidência.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleNext = () => {
     if (etapa < 3) {
       setEtapa(etapa + 1);
     } else {
-      handleRegister();
-    }
-  };
-
-  const handleRegister = async () => {
-    setIsLoading(true);
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('categoria', formData.categoria);
-      formDataToSend.append('tipo', formData.tipo);
-      formDataToSend.append('coletadoPor', formData.coletadoPor);
-      formDataToSend.append('casoReferencia', formData.casoReferencia);
-      formDataToSend.append('nome', formData.nome);
-      formDataToSend.append('sexo', formData.sexo);
-      formDataToSend.append('estadoCorpo', formData.estadoCorpo);
-      formDataToSend.append('idadeAproximada', formData.idadeAproximada);
-      formDataToSend.append('nacionalidade', formData.nacionalidade);
-      formDataToSend.append('cidade', formData.cidade);
-      formDataToSend.append('lesoes', formData.lesoes);
-      formDataToSend.append('identificada', formData.identificada.toString());
-
-      if (formData.tipo === 'texto') {
-        formDataToSend.append('conteudo', formData.conteudo);
-      } else if (formData.tipo === 'imagem' && formData.imagemUri) {
-        formDataToSend.append('imagem', {
-          uri: formData.imagemUri,
-          name: 'evidence.jpg',
-          type: 'image/jpeg',
-        } as any);
-      }
-
-      const response = await axios.post('YOUR_API_URL/api/evidences', formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          // Add authorization token if needed
-          // 'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      setIsLoading(false);
-      setShowConfirmModal(true);
-    } catch (error) {
-      setIsLoading(false);
-      console.error('Erro ao registrar evidência:', error);
-      alert('Erro ao registrar evidência. Tente novamente.');
+      handleSubmit();
     }
   };
 
@@ -114,196 +226,295 @@ const NovaEvidenciaScreen = () => {
     router.back();
   };
 
+  // Render form steps
   const renderConteudoEtapa = () => {
     switch (etapa) {
       case 1:
         return (
-          <>
-            <Text style={tw`text-[18px] text-[#333] mt-[20px] mb-0 font-bold text-center`}>
-              Informações da Evidência
-            </Text>
-            <FormContainer>
-              <FormSection
-                fields={[
-                  { label: 'Categoria', placeholder: 'Ex: Digital, Física', name: 'categoria' },
-                  {
-                    label: 'Tipo',
-                    placeholder: 'Selecione o tipo',
-                    name: 'tipo',
-                    type: 'select',
-                    options: [
-                      { label: 'Imagem', value: 'imagem' },
-                      { label: 'Texto', value: 'texto' },
-                    ],
-                  },
-                  { label: 'Coletado Por', placeholder: 'Nome ou ID do coletador', name: 'coletadoPor' },
-                  { label: 'Caso Referência', placeholder: 'Ex: CASO-001', name: 'casoReferencia' },
-                ]}
-                onChange={handleInputChange}
+          <View style={tw`mx-5 mt-5`}>
+            <Text style={tw`text-lg font-bold text-gray-800 text-center mb-4`}>Informações da Evidência</Text>
+            <Select
+              label="Tipo de Evidência *"
+              value={tipo}
+              onChange={(value) => setTipo(value as 'imagem' | 'texto')}
+              options={['texto', 'imagem']}
+              disabled={isLoading}
+            />
+            <Select
+              label="Caso (Referência) *"
+              value={casoReferencia}
+              onChange={setCasoReferencia}
+              options={filterOptions.casos}
+              disabled={isLoading || filterOptions.casos.length === 0}
+            />
+            <Input
+              label="Categoria *"
+              value={categoria}
+              placeholder="Ex: Radiografia Panorâmica"
+              onChange={setCategoria}
+              disabled={isLoading}
+            />
+            <Select
+              label="Coletado por (Nome) *"
+              value={coletadoPor}
+              onChange={setColetadoPor}
+              options={filterOptions.coletadoPor}
+              disabled={isLoading}
+            />
+            {tipo === 'texto' && (
+              <Textarea
+                label="Texto *"
+                value={texto}
+                placeholder="Relatório textual sobre a arcada dentária"
+                onChange={setTexto}
+                disabled={isLoading}
               />
-            </FormContainer>
-          </>
+            )}
+            {tipo === 'imagem' && (
+              <View style={tw`mb-4`}>
+                <Text style={tw`text-sm font-medium text-gray-700 mb-1`}>Arquivo (Imagem) *</Text>
+                <TouchableOpacity
+                  style={tw`bg-[#4A8481] py-3 rounded-md items-center`}
+                  onPress={() => setShowImageModal(true)}
+                  disabled={isLoading}
+                >
+                  <Text style={tw`text-white font-medium`}>Selecionar Imagem</Text>
+                </TouchableOpacity>
+                {imagemUri && (
+                  <View style={tw`mt-4`}>
+                    <Text style={tw`text-sm font-medium text-gray-700 mb-1`}>Prévia da Imagem</Text>
+                    <Image
+                      source={{ uri: imagemUri }}
+                      style={tw`w-full max-w-xs h-48 rounded-md`}
+                      resizeMode="cover"
+                    />
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
         );
 
       case 2:
         return (
-          <>
-            <Text style={tw`text-[18px] text-[#333] mt-[20px] mb-0 font-bold text-center`}>
-              Informações da Vítima
-            </Text>
-            <FormContainer>
-              <FormSection
-                fields={[
-                  { label: 'Nome', placeholder: 'Nome da vítima (opcional)', name: 'nome' },
-                  {
-                    label: 'Sexo',
-                    placeholder: 'Selecione o sexo',
-                    name: 'sexo',
-                    type: 'select',
-                    options: [
-                      { label: 'Masculino', value: 'masculino' },
-                      { label: 'Feminino', value: 'feminino' },
-                      { label: 'Indeterminado', value: 'indeterminado' },
-                    ],
-                  },
-                  {
-                    label: 'Estado do Corpo',
-                    placeholder: 'Selecione o estado',
-                    name: 'estadoCorpo',
-                    type: 'select',
-                    options: [
-                      { label: 'Inteiro', value: 'inteiro' },
-                      { label: 'Fragmentado', value: 'fragmentado' },
-                      { label: 'Carbonizado', value: 'carbonizado' },
-                      { label: 'Putrefacto', value: 'putrefacto' },
-                      { label: 'Esqueleto', value: 'esqueleto' },
-                    ],
-                  },
-                  { label: 'Idade Aproximada', placeholder: 'Ex: 30', name: 'idadeAproximada', keyboardType: 'numeric' },
-                  { label: 'Nacionalidade', placeholder: 'Ex: Brasileira', name: 'nacionalidade' },
-                  { label: 'Cidade', placeholder: 'Ex: São Paulo', name: 'cidade' },
-                  { label: 'Lesões', placeholder: 'Descreva lesões (opcional)', name: 'lesoes', multiline: true },
-                  {
-                    label: 'Identificada',
-                    name: 'identificada',
-                    type: 'toggle',
-                    value: formData.identificada,
-                  },
-                ]}
-                onChange={handleInputChange}
+          <View style={tw`mx-5 mt-5`}>
+            <Text style={tw`text-lg font-bold text-gray-800 text-center mb-4`}>Dados da Vítima</Text>
+            <View style={tw`mb-4`}>
+              <Text style={tw`text-sm font-medium text-gray-700 mb-1`}>Criar nova vítima</Text>
+              <Switch
+                value={createNewVitima}
+                onValueChange={setCreateNewVitima}
+                disabled={isLoading}
               />
-            </FormContainer>
-          </>
+            </View>
+            {!createNewVitima && (
+              <Select
+                label="Selecionar Vítima Existente *"
+                value={selectedVitimaId}
+                onChange={(value) => {
+                  setSelectedVitimaId(value);
+                  const vitima = vitimas.find((v) => v._id === value);
+                  if (vitima) {
+                    setVitimaNome(vitima.nome || '');
+                    setVitimaDataNascimento(vitima.dataNascimento || '');
+                    setVitimaIdadeAproximada(vitima.idadeAproximada ? vitima.idadeAproximada.toString() : '');
+                    setVitimaNacionalidade(vitima.nacionalidade || '');
+                    setVitimaCidade(vitima.cidade || '');
+                    setVitimaSexo(vitima.sexo || 'masculino');
+                    setVitimaEstadoCorpo(vitima.estadoCorpo || 'inteiro');
+                    setVitimaLesoes(vitima.lesoes || '');
+                    setVitimaIdentificada(vitima.identificada || false);
+                  }
+                }}
+                options={vitimas.map((v) => `${v.nome || 'Não identificada'} (${v.estadoCorpo || 'Inteiro'})`)}
+                disabled={isLoading}
+              />
+            )}
+            {createNewVitima && (
+              <View>
+                <Input
+                  label="Nome da Vítima"
+                  value={vitimaNome}
+                  placeholder="Ex: João Silva"
+                  onChange={setVitimaNome}
+                  disabled={isLoading}
+                />
+                <Input
+                  label="Data de Nascimento"
+                  value={vitimaDataNascimento}
+                  type="date"
+                  onChange={setVitimaDataNascimento}
+                  disabled={isLoading}
+                />
+                <Input
+                  label="Idade Aproximada"
+                  value={vitimaIdadeAproximada}
+                  type="number"
+                  placeholder="Ex: 30"
+                  onChange={setVitimaIdadeAproximada}
+                  disabled={isLoading}
+                />
+                <Input
+                  label="Nacionalidade"
+                  value={vitimaNacionalidade}
+                  placeholder="Ex: Brasileira"
+                  onChange={setVitimaNacionalidade}
+                  disabled={isLoading}
+                />
+                <Input
+                  label="Cidade"
+                  value={vitimaCidade}
+                  placeholder="Ex: São Paulo"
+                  onChange={setVitimaCidade}
+                  disabled={isLoading}
+                />
+                <Select
+                  label="Sexo *"
+                  value={vitimaSexo}
+                  onChange={(value) => setVitimaSexo(value as 'masculino' | 'feminino' | 'indeterminado')}
+                  options={['masculino', 'feminino', 'indeterminado']}
+                  disabled={isLoading}
+                />
+                <Select
+                  label="Estado do Corpo *"
+                  value={vitimaEstadoCorpo}
+                  onChange={(value) =>
+                    setVitimaEstadoCorpo(value as 'inteiro' | 'fragmentado' | 'carbonizado' | 'putrefacto' | 'esqueleto')
+                  }
+                  options={['inteiro', 'fragmentado', 'carbonizado', 'putrefacto', 'esqueleto']}
+                  disabled={isLoading}
+                />
+                <Input
+                  label="Lesões"
+                  value={vitimaLesoes}
+                  placeholder="Ex: Fratura no osso maxilar"
+                  onChange={setVitimaLesoes}
+                  disabled={isLoading}
+                />
+                <View style={tw`mb-4`}>
+                  <Text style={tw`text-sm font-medium text-gray-700 mb-1`}>Identificada</Text>
+                  <Switch
+                    value={vitimaIdentificada}
+                    onValueChange={setVitimaIdentificada}
+                    disabled={isLoading}
+                  />
+                </View>
+              </View>
+            )}
+          </View>
         );
 
       case 3:
         const evidenceData = {
-          categoria: formData.categoria || 'Não especificado',
-          tipo: formData.tipo || 'Não especificado',
-          coletadoPor: formData.coletadoPor || 'Não especificado',
-          casoReferencia: formData.casoReferencia || 'Não especificado',
-          nome: formData.nome || 'Não especificado',
-          sexo: formData.sexo || 'Não especificado',
-          estadoCorpo: formData.estadoCorpo || 'Não especificado',
-          idadeAproximada: formData.idadeAproximada || 'Não especificado',
-          nacionalidade: formData.nacionalidade || 'Não especificado',
-          cidade: formData.cidade || 'Não especificado',
-          lesoes: formData.lesoes || 'Não especificado',
-          identificada: formData.identificada ? 'Sim' : 'Não',
-          conteudo: formData.conteudo || 'N/A',
-          imagemUri: formData.imagemUri ? 'Imagem selecionada' : 'Nenhuma imagem',
+          categoria: categoria || 'Não especificado',
+          tipo: tipo || 'Não especificado',
+          coletadoPor: coletadoPor || 'Não especificado',
+          casoReferencia: casoReferencia || 'Não especificado',
+          nome: vitimaNome || 'Não especificado',
+          sexo: vitimaSexo || 'Não especificado',
+          estadoCorpo: vitimaEstadoCorpo || 'Não especificado',
+          idadeAproximada: vitimaIdadeAproximada || 'Não especificado',
+          nacionalidade: vitimaNacionalidade || 'Não especificado',
+          cidade: vitimaCidade || 'Não especificado',
+          lesoes: vitimaLesoes || 'Não especificado',
+          identificada: vitimaIdentificada ? 'Sim' : 'Não',
+          conteudo: texto || 'N/A',
+          imagemUri: imagemUri ? 'Imagem selecionada' : 'Nenhuma imagem',
         };
 
         return (
           <ScrollView style={tw`flex-1`}>
             <View style={tw`mx-5 mt-5`}>
-              <Text style={tw`text-[18px] text-[#333] font-bold mb-4 text-center`}>Revisão Final da Evidência</Text>
-              {/* Cartão: Informações da Evidência */}
-              <View style={tw`bg-white rounded-[15px] p-5 mb-5 shadow-lg elevation-8 border border-gray-200`}>
-                <Text style={tw`text-[16px] text-[#333] font-bold mb-3 border-b border-gray-200 pb-2`}>Informações da Evidência</Text>
+              <Text style={tw`text-lg font-bold text-gray-800 mb-4 text-center`}>Revisão Final da Evidência</Text>
+              <View style={tw`bg-white rounded-xl p-5 mb-5 shadow-lg border border-gray-200`}>
+                <Text style={tw`text-base font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2`}>Informações da Evidência</Text>
                 <View style={tw`mb-3`}>
-                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Categoria:</Text>
-                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.categoria}</Text>
+                  <Text style={tw`text-sm font-semibold text-gray-800`}>Categoria:</Text>
+                  <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.categoria}</Text>
                 </View>
                 <View style={tw`mb-3`}>
-                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Tipo:</Text>
-                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.tipo}</Text>
+                  <Text style={tw`text-sm font-semibold text-gray-800`}>Tipo:</Text>
+                  <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.tipo}</Text>
                 </View>
                 <View style={tw`mb-3`}>
-                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Coletado Por:</Text>
-                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.coletadoPor}</Text>
+                  <Text style={tw`text-sm font-semibold text-gray-800`}>Coletado Por:</Text>
+                  <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.coletadoPor}</Text>
                 </View>
                 <View style={tw`mb-3`}>
-                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Caso Referência:</Text>
-                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.casoReferencia}</Text>
+                  <Text style={tw`text-sm font-semibold text-gray-800`}>Caso Referência:</Text>
+                  <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.casoReferencia}</Text>
                 </View>
-                {formData.tipo === 'texto' && (
+                {tipo === 'texto' && (
                   <View style={tw`mb-3`}>
-                    <Text style={tw`text-[14px] text-[#333] font-semibold`}>Conteúdo:</Text>
-                    <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.conteudo}</Text>
+                    <Text style={tw`text-sm font-semibold text-gray-800`}>Conteúdo:</Text>
+                    <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.conteudo}</Text>
                   </View>
                 )}
-                {formData.tipo === 'imagem' && (
+                {tipo === 'imagem' && (
                   <View style={tw`mb-3`}>
-                    <Text style={tw`text-[14px] text-[#333] font-semibold`}>Imagem:</Text>
-                    <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.imagemUri}</Text>
+                    <Text style={tw`text-sm font-semibold text-gray-800`}>Imagem:</Text>
+                    <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.imagemUri}</Text>
                     <TouchableOpacity
-                      style={tw`bg-[#4A8481] rounded-[8px] py-2 mt-2 items-center`}
+                      style={tw`bg-[#4A8481] rounded-md py-2 mt-2 items-center`}
                       onPress={() => setShowImageModal(true)}
                     >
-                      <Text style={tw`text-white text-[14px] font-bold`}>Selecionar Imagem</Text>
+                      <Text style={tw`text-white text-sm font-bold`}>Alterar Imagem</Text>
                     </TouchableOpacity>
                   </View>
                 )}
               </View>
-              {/* Cartão: Informações da Vítima */}
-              <View style={tw`bg-white rounded-[15px] p-5 mb-5 shadow-lg elevation-8 border border-gray-200`}>
-                <Text style={tw`text-[16px] text-[#333] font-bold mb-3 border-b border-gray-200 pb-2`}>Informações da Vítima</Text>
+              <View style={tw`bg-white rounded-xl p-5 mb-5 shadow-lg border border-gray-200`}>
+                <Text style={tw`text-base font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2`}>Informações da Vítima</Text>
                 <View style={tw`mb-3`}>
-                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Nome:</Text>
-                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.nome}</Text>
+                  <Text style={tw`text-sm font-semibold text-gray-800`}>Nome:</Text>
+                  <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.nome}</Text>
                 </View>
                 <View style={tw`mb-3`}>
-                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Sexo:</Text>
-                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.sexo}</Text>
+                  <Text style={tw`text-sm font-semibold text-gray-800`}>Sexo:</Text>
+                  <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.sexo}</Text>
                 </View>
                 <View style={tw`mb-3`}>
-                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Estado do Corpo:</Text>
-                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.estadoCorpo}</Text>
+                  <Text style={tw`text-sm font-semibold text-gray-800`}>Estado do Corpo:</Text>
+                  <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.estadoCorpo}</Text>
                 </View>
                 <View style={tw`mb-3`}>
-                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Idade Aproximada:</Text>
-                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.idadeAproximada}</Text>
+                  <Text style={tw`text-sm font-semibold text-gray-800`}>Idade Aproximada:</Text>
+                  <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.idadeAproximada}</Text>
                 </View>
                 <View style={tw`mb-3`}>
-                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Nacionalidade:</Text>
-                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.nacionalidade}</Text>
+                  <Text style={tw`text-sm font-semibold text-gray-800`}>Nacionalidade:</Text>
+                  <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.nacionalidade}</Text>
                 </View>
                 <View style={tw`mb-3`}>
-                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Cidade:</Text>
-                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.cidade}</Text>
+                  <Text style={tw`text-sm font-semibold text-gray-800`}>Cidade:</Text>
+                  <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.cidade}</Text>
                 </View>
                 <View style={tw`mb-3`}>
-                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Lesões:</Text>
-                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.lesoes}</Text>
+                  <Text style={tw`text-sm font-semibold text-gray-800`}>Lesões:</Text>
+                  <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.lesoes}</Text>
                 </View>
                 <View style={tw`mb-3`}>
-                  <Text style={tw`text-[14px] text-[#333] font-semibold`}>Identificada:</Text>
-                  <Text style={tw`text-[14px] text-[#555] mt-1`}>{evidenceData.identificada}</Text>
+                  <Text style={tw`text-sm font-semibold text-gray-800`}>Identificada:</Text>
+                  <Text style={tw`text-sm text-gray-600 mt-1`}>{evidenceData.identificada}</Text>
                 </View>
               </View>
-              <TouchableOpacity
-                style={tw`bg-[#4A8481] rounded-[8px] py-3.75 items-center mx-10 mt-5 mb-5`}
-                onPress={handleRegister}
-                disabled={isLoading}
-              >
-                <Text style={tw`text-white text-[16px] font-bold`}>Registrar</Text>
-              </TouchableOpacity>
-              {isLoading && (
-                <View style={tw`absolute top-0 left-0 right-0 bottom-0 justify-center items-center bg-black/50`}>
-                  <ActivityIndicator size="large" color="#4A8481" />
+              {selectedVitimaId && existingEvidences.length > 0 && (
+                <View style={tw`bg-white rounded-xl p-5 mb-5 shadow-lg border border-gray-200`}>
+                  <Text style={tw`text-base font-bold text-gray-800 mb-3`}>Evidências Existentes</Text>
+                  {existingEvidences.map((evidencia) => (
+                    <Text key={evidencia._id} style={tw`text-sm text-gray-600 mb-2`}>
+                      {evidencia.categoria} ({evidencia.tipo}, {evidencia.texto || evidencia.imagem || 'N/A'}) - Coletado por: {evidencia.coletadoPor}
+                    </Text>
+                  ))}
                 </View>
               )}
+              {error && <Text style={tw`text-red-500 text-sm mb-4`}>{error}</Text>}
+              {success && <Text style={tw`text-green-600 text-sm mb-4`}>{success}</Text>}
+              <View style={tw`flex-row justify-between mx-10 mb-5`}>
+                <PrimaryButton text="Início" onPress={() => router.back()} disabled={isLoading} />
+                <PrimaryButton text="Ir para Gerar Laudo" onPress={() => router.push('/Laudo/cadastrar')} disabled={isLoading} />
+                <PrimaryButton text={isLoading ? 'Carregando...' : 'Cadastrar Evidência'} onPress={handleSubmit} disabled={isLoading || !isFormValid} />
+              </View>
             </View>
           </ScrollView>
         );
@@ -313,6 +524,29 @@ const NovaEvidenciaScreen = () => {
     }
   };
 
+  if (authLoading) {
+    return (
+      <View style={tw`flex-1 justify-center items-center bg-[#F5F5F5]`}>
+        <ActivityIndicator size="large" color="#4A8481" />
+        <Text style={tw`text-gray-600 mt-4`}>Carregando...</Text>
+      </View>
+    );
+  }
+
+  if (authError) {
+    return (
+      <View style={tw`flex-1 justify-center items-center bg-[#F5F5F5]`}>
+        <Text style={tw`text-red-500 text-center`}>Erro de autenticação: {authError}. Tente fazer login novamente.</Text>
+      </View>
+    );
+  }
+
+  //DESCOMENTAR DEPOIS DE IMPLEMENTAR O CONTEXTO DE AUTENTICAÇÃO
+  // if (!user || !['admin', 'perito', 'assistente'].includes(user.perfil.toLowerCase())) {
+  //   router.push('/(tabs)/home');
+  //   return null;
+  // }
+
   return (
     <SafeAreaView style={tw`flex-1 bg-[#F5F5F5]`}>
       <Header title="Nova Evidência" />
@@ -320,38 +554,26 @@ const NovaEvidenciaScreen = () => {
       {renderConteudoEtapa()}
       {etapa < 3 && (
         <TouchableOpacity
-          style={tw`bg-[#679AA3] rounded-[10px] py-3 mx-10 mt-5 shadow-lg elevation-5`}
+          style={tw`bg-[#679AA3] rounded-md py-3 mx-10 mt-5 shadow-lg`}
           onPress={handleNext}
-          activeOpacity={0.8}
+          disabled={isLoading}
         >
-          <Text style={tw`text-white text-[16px] font-bold text-center`}>Próximo</Text>
+          <Text style={tw`text-white text-center font-bold`}>Próximo</Text>
         </TouchableOpacity>
       )}
-      <ConfirmSaveModal
-        visible={showConfirmModal}
-        onClose={handleCloseConfirmModal}
-      />
+      <ConfirmSaveModal visible={showConfirmModal} onClose={handleCloseConfirmModal} />
       <AddImageModal
         visible={showImageModal}
         onClose={() => setShowImageModal(false)}
-        onImageSelect={(uri) => handleInputChange('imagemUri', uri)}
+        onImageSelect={setImagemUri}
       />
+      {isLoading && (
+        <View style={tw`absolute top-0 left-0 right-0 bottom-0 justify-center items-center bg-black/50`}>
+          <ActivityIndicator size="large" color="#4A8481" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
 
 export default NovaEvidenciaScreen;
-=======
-import React from 'react';
-import { View, Text } from 'react-native';
-
-const DetalhesCasoScreen: React.FC = () => {
-  return (
-    <View>
-      <Text>Detalhes do Caso</Text>
-    </View>
-  );
-};
-
-export default DetalhesCasoScreen;
->>>>>>> Lucas

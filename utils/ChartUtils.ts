@@ -1,4 +1,4 @@
-import { DadosItem } from "@/Types/Dashboards";
+import { DadosItem } from "@/types/Dashboards";
 
 export const getColorWithOpacity = (baseColor: string) => (opacity: number) => baseColor.replace(')', `, ${opacity})`).replace('rgb', 'rgba');
 

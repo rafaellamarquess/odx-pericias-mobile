@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import tw from 'twrnc';
-import { DadosItem } from '@/Types/Dashboards';
+import { DadosItem } from '@/types/Dashboards';
 
 interface DataTableProps {
   dadosAtuais: DadosItem[];

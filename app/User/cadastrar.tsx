@@ -17,13 +17,14 @@ export default function CadastroScreen() {
   });
 
   const handleAddUser = () => {
+    // Simula chamada ao back-end
     console.log('Usuário adicionado:', formData);
     setShowForm(false);
   };
 
   const handleBackToUsers = () => {
     setShowForm(true);
-    router.push('/User/listar'); // Redireciona para a tela ListarScreen
+    router.push('/User');
     setFormData({ name: '', rg: '', cro: '', role: '', email: '', password: '' });
   };
 
@@ -35,15 +36,30 @@ export default function CadastroScreen() {
         </TouchableOpacity>
         <Text style={tw`text-white text-lg font-semibold`}>Gestão de Usuários</Text>
         <Image
-          source={require('../../assets/images/logo.png')}
+          source={require('../../assets/images/Logo-odx.png')}
           style={tw`w-8 h-8 ml-2`}
           resizeMode="contain"
         />
       </View>
 
       <View style={tw`flex-1 mx-4 mt-4 mb-20 p-6`}>
+        <View style={tw`flex-row justify-between mt-4`}>
+              <TouchableOpacity
+                style={tw`bg-[#679AA3] py-2 px-4 rounded-md flex-1 mx-2`}
+                onPress={() => router.push('/User')}
+              >
+                <Text style={tw`text-white text-sm font-semibold text-center`}>Início</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={tw`bg-[#679AA3] py-2 px-4 rounded-md flex-1 mx-2`}
+                onPress={() => router.push('/User/editar')}
+              >
+                <Text style={tw`text-white text-sm font-semibold text-center`}>Editar Usuário</Text>
+              </TouchableOpacity>
+            </View>
+
         {showForm ? (
-          <View style={tw`mt-6 p-4 bg-white rounded-lg shadow-md`}>
+          <View style={tw`p-4 bg-white rounded-lg shadow-md`}>
             <Text style={tw`text-xl text-[#333] mb-4 font-semibold`}>Informações do Usuário</Text>
             <TextInput
               style={tw`border border-gray-300 p-2 mb-4 rounded-md`}
@@ -84,11 +100,13 @@ export default function CadastroScreen() {
               secureTextEntry
             />
             <TouchableOpacity
-              style={tw`bg-[#4A8481] py-2 px-4 rounded-md items-center`}
-              onPress={handleAddUser}
+              style={tw`bg-[#4A8481] py-2 px-4 rounded-md items-center mb-4`}
+              // onPress={handleAddUser}
+              onPress={() => router.push('/User')}
             >
               <Text style={tw`text-white text-sm font-semibold`}>Adicionar Usuário</Text>
             </TouchableOpacity>
+
           </View>
         ) : (
           <View style={tw`flex-1 justify-center items-center p-6`}>

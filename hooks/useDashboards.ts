@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { FiltroKey, DashboardData } from '@/Types/Dashboards';
+import { FiltroKey, DashboardData } from '@/types/Dashboards';
 import { fetchDashboardData } from '@/lib/DashboardApi';
 import { Dimensions } from 'react-native';
 

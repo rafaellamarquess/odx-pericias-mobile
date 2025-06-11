@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import tw from 'twrnc';
-import { FiltroKey } from '@/Types/Dashboards';
+import { FiltroKey } from '@/types/Dashboards';
 
 const filtros: { label: string; key: FiltroKey }[] = [
   { label: 'Vítima', key: 'vitima' },

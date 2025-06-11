@@ -19,8 +19,8 @@ export default function EditarScreen() {
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
-    rg: user?.register.startsWith('RG') ? user.register : '',
-    cro: user?.register.startsWith('CRO') ? user.register : '',
+    rg: user?.register.startsWith('RG') ? user.register.replace('RG ', '') : '',
+    cro: user?.register.startsWith('CRO') ? user.register.replace('CRO ', '') : '',
     role: user?.role || '',
     email: user?.email || '',
     password: user?.password || '',
@@ -29,28 +29,41 @@ export default function EditarScreen() {
   const handleSaveChanges = () => {
     // Simulação de atualização (futuro backend)
     console.log('Usuário atualizado:', { id, ...formData });
-    router.push('/user/index'); // Redireciona para a tela Index após salvar
+    router.push('/User'); 
   };
 
   return (
     <View style={tw`flex-1 bg-[#F8F9FA]`}>
-      {/* Cabeçalho */}
       <View style={tw`flex-row items-center justify-between p-4 bg-[#679AA3] rounded-b-2xl`}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={36} color="white" />
         </TouchableOpacity>
-        <Text style={tw`text-white text-lg font-semibold`}>Editar Usuário</Text>
+        <Text style={tw`text-white text-lg font-semibold`}>Gestão de Usuários</Text>
         <Image
-          source={require('../../assets/images/logo.png')}
+          source={require('../../assets/images/Logo-odx.png')}
           style={tw`w-8 h-8 ml-2`}
           resizeMode="contain"
         />
       </View>
 
-      {/* Área Principal */}
+
       <View style={tw`flex-1 mx-4 mt-4 mb-20 p-6`}>
-        <View style={tw`mt-6 p-4 bg-white rounded-lg shadow-md`}>
-          <Text style={tw`text-xl text-[#333] mb-4 font-semibold`}>Informações do Usuário</Text>
+        <View style={tw`flex-row justify-between mt-4`}>
+              <TouchableOpacity
+                style={tw`bg-[#679AA3] py-2 px-4 rounded-md flex-1 mx-2`}
+                onPress={() => router.push('/User')}
+              >
+                <Text style={tw`text-white text-sm font-semibold text-center`}>Início</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={tw`bg-[#679AA3] py-2 px-4 rounded-md flex-1 mx-2`}
+                onPress={() => router.push('/User/editar')}
+              >
+                <Text style={tw`text-white text-sm font-semibold text-center`}>Editar Usuário</Text>
+              </TouchableOpacity>
+            </View>
+        <View style={tw`p-4 bg-white rounded-lg shadow-md`}>
+          <Text style={tw`text-xl text-[#333] mb-4 font-semibold`}>Editar Usuário</Text>
           <TextInput
             style={tw`border border-gray-300 p-2 mb-4 rounded-md`}
             placeholder="Nome"
@@ -90,11 +103,13 @@ export default function EditarScreen() {
             secureTextEntry
           />
           <TouchableOpacity
-            style={tw`bg-[#4A8481] py-2 px-4 rounded-md items-center`}
-            onPress={handleSaveChanges}
-          >
+            style={tw`bg-[#4A8481] py-2 px-4 rounded-md items-center mb-4`}
+            // onPress={handleSaveChanges}
+            onPress={() => router.push('/User')}
+            >
             <Text style={tw`text-white text-sm font-semibold`}>Salvar Alterações</Text>
           </TouchableOpacity>
+
         </View>
       </View>
     </View>

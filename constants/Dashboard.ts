@@ -1,5 +1,5 @@
 import { ChartConfig } from 'react-native-chart-kit/dist/HelperTypes';
-import { FiltroKey, DashboardData } from '@/Types/Dashboards';
+import { FiltroKey, DashboardData } from '@/types/Dashboards';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUsers, faClipboard, faChartBar, faSearch, faGlobe, IconDefinition, faChartLine, faFolder, faMicroscope} from '@fortawesome/free-solid-svg-icons';
 

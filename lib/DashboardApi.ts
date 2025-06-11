@@ -1,5 +1,5 @@
 import api from './axiosConfig';
-import { DashboardData } from '@/Types/Dashboards';
+import { DashboardData } from '@/types/Dashboards';
 
 interface FilterParams {
   mes?: string;

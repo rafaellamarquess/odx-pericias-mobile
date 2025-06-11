@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { fetchDashboardData } from '@/lib/DashboardApi';
-import { DashboardData } from '@/Types/Dashboards';
+import { DashboardData } from '@/types/Dashboards';
 import TotalCasesCard from '@/components/Dashboard/TotalCasesCard';
 import PeriodFilters from '@/components/Dashboard/PeriodFilters';
 import FilterButtons from '@/components/Dashboard/FilterButton';
