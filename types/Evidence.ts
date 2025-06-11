@@ -1,26 +1,23 @@
-import { IVitima } from "./Vitima";
-import { ICase } from "./Case";
-
-export interface IEvidence {
+interface IEvidence {
   _id: string;
-  caso: string | ICase;
-  vitima?: IVitima | undefined;
-  tipo: "imagem" | "texto";
+  casoReferencia: string;
+  tipo: 'imagem' | 'texto';
   categoria: string;
-  dataUpload: string | Date | null;
-  coletadoPor: string; 
-  texto?: string | null;
-  imagem?: string | null;
+  coletadoPor: string;
+  texto?: string;
+  imagem?: string;
+  vitimaId: string;
+  dataUpload: string;
+  vitima?: {
+    _id: string;
+    nome?: string;
+    identificada?: boolean;
+    sexo?: string;
+    estadoCorpo?: string;
+  };
 }
 
-export interface EvidenceResponse {
-  msg: string;
-  evidence: IEvidence;
-  vitima: IVitima;
-}
-
-export interface EvidenceListResponse {
-  msg?: string;
+interface EvidenceListResponse {
   evidencias: IEvidence[];
   paginacao: {
     total: number;
@@ -29,3 +26,5 @@ export interface EvidenceListResponse {
     totalPaginas: number;
   };
 }
+
+export type { IEvidence, EvidenceListResponse };

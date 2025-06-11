@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface User {
   perfil: string;
+  id: string;
   // Add other user properties as needed
 }
 
@@ -29,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = await AsyncStorage.getItem('authToken');
         if (token) {
           // Replace with actual API call to verify token and fetch user
-          setUser({ perfil: 'admin' }); // Mock user data; replace with real user fetch
+          setUser({ perfil: 'admin', id: 'mock-id' }); // Mock user data; replace with real user fetch
         }
       } catch (err) {
         setError('Erro ao carregar usuário');

@@ -1,11 +1,11 @@
-import { IVitima } from "./Vitima";
-import { Evidence } from "./Evidence";
-import { IUser } from "./User";
-import { ICase } from "./Case";
+import { IVitima } from './Vitima';
+import { IEvidence } from './Evidence';
+import { IUser } from './User';
+import { ICase } from './Case';
 
 export interface ILaudo {
   _id?: string;
-  evidencias: Array<string | Evidence>;
+  evidencias: Array<string | IEvidence>;
   vitima: string | IVitima;
   caso: string | ICase;
   perito: string | IUser;

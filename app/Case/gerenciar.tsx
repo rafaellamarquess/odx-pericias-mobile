@@ -102,11 +102,10 @@ const GestaoCasosScreen = () => {
     ]);
   };
 
-  const handleEdit = (id: string, updatedCase: Partial<ICase>) => {
-    setCases(cases.map((c) => (c._id === id ? { ...c, ...updatedCase } : c)));
-    setFilteredCases(cases.map((c) => (c._id === id ? { ...c, ...updatedCase } : c)));
+  const handleEdit = (id: string) => {
+    router.push(`/Case/editar`);
     if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
   };
 
@@ -134,7 +133,8 @@ const GestaoCasosScreen = () => {
   return (
     <SafeAreaView style={tw`flex-1 bg-[#F5F5F5]`}>
       <View style={tw`flex-1`}>
-        <Header title="GESTÃO DE CASOS" />
+        <Header title="Gestão de Casos" />
+
         <SearchBar searchText={searchText} setSearchText={setSearchText} />
         <StatusFilter
           statusOptions={statusOptions}

@@ -3,7 +3,7 @@ type FiltroKey = 'vitima' | 'sexo' | 'estado' | 'lesoes' | 'cidade';
 interface DadosItem {
   categoria: string;
   quantidade: number;
-  tipoGrafico?: string;
+  tipoGrafico?: 'pizza' | 'barra';
 }
 
 interface DashboardData {

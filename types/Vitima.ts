@@ -1,21 +1,19 @@
-import { ICase } from "./Case";
-
-export interface IVitima {
+interface IVitima {
   _id: string;
-  nome?: string | null;
-  dataNascimento?: string | null;
-  idadeAproximada?: number | null;
-  nacionalidade?: string | null;
-  cidade?: string | null;
-  sexo: "masculino" | "feminino" | "indeterminado";
-  estadoCorpo: "inteiro" | "fragmentado" | "carbonizado" | "putrefacto" | "esqueleto";
-  lesoes?: string | null;
+  nome?: string;
+  dataNascimento?: string;
+  idadeAproximada?: number;
+  nacionalidade?: string;
+  cidade?: string;
+  sexo: 'masculino' | 'feminino' | 'indeterminado';
+  estadoCorpo: 'inteiro' | 'fragmentado' | 'carbonizado' | 'putrefacto' | 'esqueleto';
+  lesoes?: string;
   identificada: boolean;
-  caso?: string | ICase | null;
+  caso?: string;
 }
 
-export interface VitimaListResponse {
-  vitimas: IVitima[];
+interface VitimaListResponse {
   data: IVitima[];
-  msg?: string;
 }
+
+export type { IVitima, VitimaListResponse };
