@@ -30,12 +30,12 @@ export default function RootLayout() {
     <AuthProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
-          <Stack.Screen name="Login/index" options={{ headerShown: false }} />
+          <Stack.Screen name="Login" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="Case/cadastrar" options={{ headerShown: false }} />
           <Stack.Screen name="Case/gerenciar" options={{ headerShown: false }} />
           <Stack.Screen name="Evidence/cadastrar" options={{ headerShown: false }} />
-          <Stack.Screen name="Evidence/gestao" options={{ headerShown: false }} />
+          <Stack.Screen name="Evidence/gerenciar" options={{ headerShown: false }} />
           <Stack.Screen name="Evidence/editar" options={{ headerShown: false }} />
           <Stack.Screen name="Laudo/cadastrar" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />

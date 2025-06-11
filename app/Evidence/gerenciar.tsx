@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { SafeAreaView, View, Text, Alert, TouchableWithoutFeedback } from 'react-native';
+import { SafeAreaView, View, Text, Alert, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import tw from 'twrnc';
 import { useAuth } from '@/contexts/AuthContext';
@@ -48,7 +48,7 @@ const EvidenceManagementScreen = () => {
       tipo: 'imagem',
       categoria: 'Radiografia',
       coletadoPor: 'Maria Oliveira',
-      imagem: '../assets/images/radiografia.png',
+      imagem: require('@/assets/images/radiografia.png'), 
       vitima: {
         _id: 'v2',
         nome: 'Não Identificada',
@@ -175,6 +175,12 @@ const EvidenceManagementScreen = () => {
     return (
       <SafeAreaView style={tw`flex-1 justify-center items-center bg-[#F5F5F5]`}>
         <Text style={tw`text-red-500 text-center px-5`}>Erro de autenticação: {authError}</Text>
+        <TouchableOpacity
+          style={tw`bg-[#4A8481] rounded-md py-3 px-5 mt-4`}
+          onPress={() => router.push('/Login')}
+        >
+          <Text style={tw`text-white text-center font-bold`}>Ir para Login</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
@@ -183,7 +189,7 @@ const EvidenceManagementScreen = () => {
     <SafeAreaView style={tw`flex-1 bg-[#F5F5F5]`}>
       <TouchableWithoutFeedback onPress={onOutsidePress}>
         <View style={tw`flex-1`}>
-          <Header title="GESTÃO DE EVIDÊNCIAS" />
+          <Header title="Gestão de Evidências" />
           <SearchBar searchText={searchText} setSearchText={setSearchText} />
           <StatusFilter
             statusOptions={statusOptions}
@@ -201,7 +207,9 @@ const EvidenceManagementScreen = () => {
           />
         </View>
       </TouchableWithoutFeedback>
-      <FloatingActionButton />
+      <FloatingActionButton onPress={function (): void {
+        throw new Error('Function not implemented.');
+      } } />
     </SafeAreaView>
   );
 };

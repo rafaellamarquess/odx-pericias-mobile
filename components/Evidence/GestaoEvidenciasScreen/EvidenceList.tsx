@@ -27,7 +27,7 @@ const EvidenceList = ({ filteredEvidences, failedImages, setFailedImages, onDele
         <View style={tw`flex-1`}>
           {item.tipo === 'imagem' && item.imagem && !failedImages.has(item._id) ? (
             <Image
-              source={{ uri: item.imagem }}
+              source={typeof item.imagem === 'string' ? { uri: item.imagem } : item.imagem} // Handle both URI and require
               style={tw`w-full h-32 rounded-xl mb-2`}
               resizeMode="cover"
               onError={() => setFailedImages(new Set(failedImages).add(item._id))}

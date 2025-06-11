@@ -1,4 +1,3 @@
-// app/Evidence/cadastrar.tsx
 import { useState, useEffect } from 'react';
 import {
   View,
@@ -299,11 +298,24 @@ const NovaEvidenciaScreen = () => {
         return (
           <View style={tw`mx-5 mt-5`}>
             <Text style={tw`text-lg font-bold text-gray-800 text-center mb-4`}>Dados da Vítima</Text>
-            <View style={tw`mb-4`}>
-              <Text style={tw`text-sm font-medium text-gray-700 mb-1`}>Criar nova vítima</Text>
+            <View style={tw`mb-4 flex-row items-center justify-between`}>
+              <Text style={tw`text-sm font-medium text-gray-700`}>Criar nova vítima</Text>
               <Switch
                 value={createNewVitima}
-                onValueChange={setCreateNewVitima}
+                onValueChange={(value) => {
+                  setCreateNewVitima(value);
+                  if (!value) {
+                    setVitimaNome('');
+                    setVitimaDataNascimento('');
+                    setVitimaIdadeAproximada('');
+                    setVitimaNacionalidade('');
+                    setVitimaCidade('');
+                    setVitimaSexo('masculino');
+                    setVitimaEstadoCorpo('inteiro');
+                    setVitimaLesoes('');
+                    setVitimaIdentificada(false);
+                  }
+                }}
                 disabled={isLoading}
               />
             </View>
@@ -326,12 +338,12 @@ const NovaEvidenciaScreen = () => {
                     setVitimaIdentificada(vitima.identificada || false);
                   }
                 }}
-                options={vitimas.map((v) => `${v.nome || 'Não identificada'} (${v.estadoCorpo || 'Inteiro'})`)}
-                disabled={isLoading}
+                options={vitimas.map((v) => v._id ? `${v.nome || 'Não identificada'} (${v.estadoCorpo || 'Inteiro'})` : '')}
+                disabled={isLoading || vitimas.length === 0}
               />
             )}
             {createNewVitima && (
-              <View>
+              <>
                 <Input
                   label="Nome da Vítima"
                   value={vitimaNome}
@@ -391,15 +403,15 @@ const NovaEvidenciaScreen = () => {
                   onChange={setVitimaLesoes}
                   disabled={isLoading}
                 />
-                <View style={tw`mb-4`}>
-                  <Text style={tw`text-sm font-medium text-gray-700 mb-1`}>Identificada</Text>
+                <View style={tw`mb-4 flex-row items-center justify-between`}>
+                  <Text style={tw`text-sm font-medium text-gray-700`}>Identificada</Text>
                   <Switch
                     value={vitimaIdentificada}
                     onValueChange={setVitimaIdentificada}
                     disabled={isLoading}
                   />
                 </View>
-              </View>
+              </>
             )}
           </View>
         );
@@ -508,12 +520,16 @@ const NovaEvidenciaScreen = () => {
                   ))}
                 </View>
               )}
-              {error && <Text style={tw`text-red-500 text-sm mb-4`}>{error}</Text>}
-              {success && <Text style={tw`text-green-600 text-sm mb-4`}>{success}</Text>}
+              {error && <Text style={tw`text-red-500 text-sm mb-4 text-center`}>{error}</Text>}
+              {success && <Text style={tw`text-green-600 text-sm mb-4 text-center`}>{success}</Text>}
               <View style={tw`flex-row justify-between mx-10 mb-5`}>
                 <PrimaryButton text="Início" onPress={() => router.back()} disabled={isLoading} />
                 <PrimaryButton text="Ir para Gerar Laudo" onPress={() => router.push('/Laudo/cadastrar')} disabled={isLoading} />
-                <PrimaryButton text={isLoading ? 'Carregando...' : 'Cadastrar Evidência'} onPress={handleSubmit} disabled={isLoading || !isFormValid} />
+                <PrimaryButton
+                  text={isLoading ? 'Carregando...' : 'Cadastrar Evidência'}
+                  onPress={handleSubmit}
+                  disabled={isLoading || !isFormValid}
+                />
               </View>
             </View>
           </ScrollView>
@@ -541,16 +557,10 @@ const NovaEvidenciaScreen = () => {
     );
   }
 
-  //DESCOMENTAR DEPOIS DE IMPLEMENTAR O CONTEXTO DE AUTENTICAÇÃO
-  // if (!user || !['admin', 'perito', 'assistente'].includes(user.perfil.toLowerCase())) {
-  //   router.push('/(tabs)/home');
-  //   return null;
-  // }
-
   return (
     <SafeAreaView style={tw`flex-1 bg-[#F5F5F5]`}>
       <Header title="Nova Evidência" />
-      <StepIndicator activeStep={etapa} setEtapa={setEtapa} />
+      <StepIndicator activeStep={etapa} setEtapa={setEtapa} totalSteps={3} />
       {renderConteudoEtapa()}
       {etapa < 3 && (
         <TouchableOpacity

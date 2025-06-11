@@ -1,42 +1,26 @@
+// components/Case/GestaoCasosScreen/FloatingActionButton.tsx
 import React from 'react';
-import { TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { TouchableOpacity, Text, Platform } from 'react-native';
+import tw from 'twrnc';
 
-const FloatingActionButton: React.FC = () => {
-  const router = useRouter();
+interface FloatingActionButtonProps {
+  onPress: () => void;
+  title: string;
+}
 
-  const handlePress = () => {
-    router.push({
-      pathname: '/Case/cadastrar',
-      params: { origin: 'GestaoCasosScreen' },
-    });
-  };
-
+const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onPress, title }) => {
   return (
-    <TouchableOpacity style={styles.button} onPress={handlePress}>
-      <Ionicons name="add" size={30} color="#FFF" />
+    <TouchableOpacity
+      style={tw`bg-[#4A8481] rounded-full p-4 absolute bottom-5 right-5 ${
+        Platform.OS === 'ios'
+          ? 'shadow-md shadow-gray-500/50'
+          : 'elevation-8'
+      }`}
+      onPress={onPress}
+    >
+      <Text style={tw`text-white text-lg font-bold`}>{title}</Text>
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#27AE60',
-    borderRadius: 30,
-    width: 60,
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-});
 
 export default FloatingActionButton;

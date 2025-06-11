@@ -88,7 +88,7 @@ const GerarLaudoScreen = () => {
         laudo: {
           _id: 'laudo-1',
           vitima: formData.vitimaId,
-          perito: user?._id || 'perito-1',
+          perito: user?.id || 'perito-1',
           caso: vitimas.find((v) => v._id === formData.vitimaId)?.caso || 'CASO-001',
           evidencias: ['ev1', 'ev2'],
           dadosAntemortem: formData.dadosAntemortem,

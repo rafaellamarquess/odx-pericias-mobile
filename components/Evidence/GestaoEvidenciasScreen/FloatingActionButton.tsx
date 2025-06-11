@@ -1,21 +1,21 @@
-import { TouchableOpacity } from 'react-native';
+// components/Evidence/GestaoEvidenciasScreen/FloatingActionButton.tsx
+import React from 'react';
+import { TouchableOpacity, Text, Platform } from 'react-native';
 import tw from 'twrnc';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import * as Haptics from 'expo-haptics';
 
-const FloatingActionButton = () => {
-  const router = useRouter();
+interface FloatingActionButtonProps {
+  onPress: () => void;
+}
 
+const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ onPress }) => {
   return (
     <TouchableOpacity
-      style={tw`absolute bottom-5 right-5 bg-[#4A8481] w-14 h-14 rounded-full justify-center items-center shadow-lg elevation-8`}
-      onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        router.push('/Evidence/cadastrar');
-      }}
+      style={tw`bg-[#4A8481] rounded-full p-4 absolute bottom-5 right-5 ${
+        Platform.OS === 'ios' ? 'shadow-md shadow-gray-500/50' : 'elevation-8'
+      }`}
+      onPress={onPress}
     >
-      <Ionicons name="add" size={24} color="white" />
+      <Text style={tw`text-white text-lg font-bold`}>+</Text>
     </TouchableOpacity>
   );
 };
