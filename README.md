@@ -44,7 +44,7 @@ Aplicativo mobile para gestão de casos de Odontologia Legal. Desenvolvido em Re
 1. **Clone o repositório**
 
 ```bash
-git clone https://github.com/seu-usuario/odx-mobile.git
+git clone https://github.com/rafaellamarquess/odx-mobile.git
 cd odx-mobile
 ```
 
